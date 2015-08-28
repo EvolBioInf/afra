@@ -1,0 +1,7 @@
+# Binaries
+alfsv
+*.o
+
+# Intermediate files
+*.out
+*.tree
