@@ -5,8 +5,25 @@
 #include <string.h>
 
 #include "io.h"
+#include "matrix.h"
+
+typedef struct tree_node {
+	struct tree_node *left_branch, *right_branch;
+	double left_dist, right_dist;
+} tree_node;
+
+typedef struct tree_root {
+	tree_node *left_branch, *right_branch, *extra_branch;
+	double left_dist, right_dist, extra_dist;
+} tree_root;
+
+#define LEAF() ((struct tree_node){0})
+#define BRANCH(...) ((struct tree_node){__VA_ARGS__})
+
+#define M(I, J) (matrix_ptr[(I)*matrix_size + (J)])
 
 int neighbor_joining(size_t matrix_size, double *matrix_ptr);
+int matrix_from_tree(size_t matrix_size, tree_root root);
 
 int main(int argc, const char *argv[]) {
 
@@ -46,7 +63,7 @@ int main(int argc, const char *argv[]) {
 		}
 
 		// print matrix
-		//printf("size: %zu\n", matrix_size);
+		// printf("size: %zu\n", matrix_size);
 
 		neighbor_joining(matrix_size, matrix_ptr);
 
@@ -57,26 +74,12 @@ int main(int argc, const char *argv[]) {
 	return exit_code;
 }
 
-typedef struct tree_node {
-	struct tree_node *left_branch, *right_branch;
-	double left_dist, right_dist;
-} tree_node;
 
-typedef struct tree_root {
-	tree_node *left_branch, *right_branch, *extra_branch;
-	double left_dist, right_dist, extra_dist;
-} tree_root;
-
-#define LEAF() ((struct tree_node){0})
-#define BRANCH(...) ((struct tree_node){__VA_ARGS__})
-
-#define M(I, J) (matrix_ptr[(I)*matrix_size + (J)])
-
-tree_node *tree;
+tree_node *node_pool;
 
 void stringify2(size_t n, tree_node *node) {
 	if (!node->left_branch) {
-		printf("%zu", node - tree);
+		printf("%zu", node - node_pool);
 		return;
 	}
 	printf("(");
@@ -111,18 +114,18 @@ void stringify(size_t n, tree_root root) {
 }
 
 int neighbor_joining(size_t matrix_size, double *matrix_ptr) {
-	if(matrix_size < 3) return -2;
+	if (matrix_size < 3) return -2;
 
-	tree = malloc(2 * matrix_size * sizeof(tree_node));
-	tree_node *empty_node_ptr = &tree[matrix_size];
+	node_pool = malloc(2 * matrix_size * sizeof(tree_node));
+	tree_node *empty_node_ptr = &node_pool[matrix_size];
 	tree_node **unjoined_nodes = malloc(matrix_size * sizeof(tree_node *));
 
 	size_t n = matrix_size;
 	size_t i, j;
 
 	for (i = 0; i < n; i++) {
-		tree[i] = LEAF();
-		unjoined_nodes[i] = &tree[i];
+		node_pool[i] = LEAF();
+		unjoined_nodes[i] = &node_pool[i];
 	}
 
 	double r[matrix_size];
@@ -131,7 +134,7 @@ int neighbor_joining(size_t matrix_size, double *matrix_ptr) {
 		for (i = 0; i < n; i++) {
 			double rr = 0.0;
 			for (j = 0; j < n; j++) {
-				if (i == j) assert(M(i,j) == 0.0);
+				if (i == j) assert(M(i, j) == 0.0);
 				assert(M(i, j) == M(j, i));
 
 				rr += M(i, j);
@@ -184,14 +187,13 @@ int neighbor_joining(size_t matrix_size, double *matrix_ptr) {
 
 		// row_k[min_i] and row_k[min_j] are undefined!
 		row_k[min_i] = 0.0;
-		row_k[min_j] = row_k[n-1];
+		row_k[min_j] = row_k[n - 1];
 
 		memcpy(&M(min_i, 0), row_k, matrix_size * sizeof(double));
-		memcpy(&M(min_j, 0), &M((n-1), 0), matrix_size * sizeof(double));
+		memcpy(&M(min_j, 0), &M((n - 1), 0), matrix_size * sizeof(double));
 
 		M(min_i, min_i) = M(min_j, min_j) = 0.0;
 
-		// The following lines are problematic.
 		for (i = 0; i < n; i++) {
 			M(i, min_i) = M(min_i, i);
 		}
@@ -216,6 +218,70 @@ int neighbor_joining(size_t matrix_size, double *matrix_ptr) {
 
 	stringify(999, root);
 
+	matrix_from_tree(matrix_size, root);
+
 	free(unjoined_nodes);
 	return -1;
+}
+
+#define INDUCED(I, J) MATRIX_CELL(induced, I, J)
+int matrix_from_tree(size_t matrix_size, tree_root root) {
+	matrix induced;
+	matrix_init(&induced, matrix_size * 2 - 1);
+
+	fprintf(stderr, "%zu\n", induced.size);
+
+	size_t i, j;
+	for (i = 0; i < induced.size; i++) {
+		for (j = 0; j < induced.size; j++) {
+			INDUCED(i, j) = i == j ? 0 : 99999.; // zero? save_inf?
+		}
+	}
+
+	// infer induced distances from tree
+	tree_node *derp = &node_pool[matrix_size * 2 - 3];
+	while (derp > node_pool) {
+		i = derp - node_pool;
+		if (derp->left_branch) {
+			j = derp->left_branch - node_pool;
+			INDUCED(i, j) = INDUCED(j, i) = derp->left_dist;
+		}
+
+		if (derp->right_branch) {
+			j = derp->right_branch - node_pool;
+			INDUCED(i, j) = INDUCED(j, i) = derp->right_dist;
+		}
+		derp--;
+	}
+
+	size_t A = root.left_branch - node_pool;
+	size_t B = root.right_branch - node_pool;
+	size_t C = root.extra_branch - node_pool;
+
+	INDUCED(A, B) = INDUCED(B, A) = root.left_dist + root.right_dist;
+	INDUCED(A, C) = INDUCED(C, A) = root.left_dist + root.extra_dist;
+	INDUCED(C, B) = INDUCED(B, C) = root.right_dist + root.extra_dist;
+
+	// Floyd-Warshall
+	size_t k;
+
+	for (k = 0; k < induced.size; k++) {
+		for (i = 0; i < induced.size; i++) {
+			for (j = 0; j < induced.size; j++) {
+				double d = INDUCED(k, i) + INDUCED(k, j);
+				if (d < INDUCED(i, j)) {
+					INDUCED(i, j) = INDUCED(j, i) = d;
+				}
+			}
+		}
+	}
+
+	for (i = 0; i < matrix_size; i++) {
+		for (j = 0; j < matrix_size; j++) {
+			printf("%lf ", INDUCED(i,j));
+		}
+		printf("\n");
+	}
+
+	matrix_free(&induced);
 }
