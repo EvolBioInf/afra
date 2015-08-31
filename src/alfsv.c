@@ -8,8 +8,9 @@
 #include "matrix.h"
 
 typedef struct tree_node {
-	struct tree_node *left_branch, *right_branch;
+	struct tree_node *left_branch, *right_branch, *parent;
 	double left_dist, right_dist;
+	ssize_t index;
 } tree_node;
 
 typedef struct tree_root {
@@ -74,7 +75,6 @@ int main(int argc, const char *argv[]) {
 	return exit_code;
 }
 
-
 tree_node *node_pool;
 
 void stringify2(size_t n, tree_node *node) {
@@ -130,7 +130,7 @@ int neighbor_joining(size_t matrix_size, double *matrix_ptr) {
 
 	double r[matrix_size];
 
-	while (n > 3) {
+	while (n > 2) {
 		for (i = 0; i < n; i++) {
 			double rr = 0.0;
 			for (j = 0; j < n; j++) {
@@ -205,20 +205,33 @@ int neighbor_joining(size_t matrix_size, double *matrix_ptr) {
 		n--;
 	}
 
-	// join three remaining nodes
-	tree_root root;
+	// // join three remaining nodes
+	// tree_root root;
 
-	root.left_branch = unjoined_nodes[0];
-	root.right_branch = unjoined_nodes[1];
-	root.extra_branch = unjoined_nodes[2];
+	// root.left_branch = unjoined_nodes[0];
+	// root.right_branch = unjoined_nodes[1];
+	// root.extra_branch = unjoined_nodes[2];
 
-	root.left_dist = (M(0, 1) + M(0, 2) - M(1, 2)) / 2.0;
-	root.right_dist = (M(0, 1) + M(1, 2) - M(0, 2)) / 2.0;
-	root.extra_dist = (M(0, 2) + M(1, 2) - M(0, 1)) / 2.0;
+	// root.left_dist = (M(0, 1) + M(0, 2) - M(1, 2)) / 2.0;
+	// root.right_dist = (M(0, 1) + M(1, 2) - M(0, 2)) / 2.0;
+	// root.extra_dist = (M(0, 2) + M(1, 2) - M(0, 1)) / 2.0;
 
-	stringify(999, root);
+	// arbitrary root:
 
-	matrix_from_tree(matrix_size, root);
+	size_t min_i = 0;
+	size_t min_j = 1;
+	tree_node branch = {
+	    .left_branch = unjoined_nodes[min_i],
+	    .right_branch = unjoined_nodes[min_j],
+	    .left_dist = (M(min_i, min_j)) / 2.0,
+	    .right_dist = (M(min_i, min_j)) / 2.0};
+
+	*empty_node_ptr++ = branch;
+	unjoined_nodes[min_i] = empty_node_ptr - 1;
+
+	stringify2(999, unjoined_nodes[0]);
+
+	//matrix_from_tree(matrix_size, root);
 
 	free(unjoined_nodes);
 	return -1;
@@ -278,10 +291,33 @@ int matrix_from_tree(size_t matrix_size, tree_root root) {
 
 	for (i = 0; i < matrix_size; i++) {
 		for (j = 0; j < matrix_size; j++) {
-			printf("%lf ", INDUCED(i,j));
+			printf("%lf ", INDUCED(i, j));
 		}
 		printf("\n");
 	}
+
+	// midpoint root
+	size_t max_i = 0, max_j = 0;
+	double max_value = 0.0;
+
+	for (i = 0; i < matrix_size; i++) {
+		for (j = 0; j < matrix_size; j++) {
+			double d = INDUCED(i, j);
+			if (d > max_value) {
+				max_value = d;
+				max_i = i;
+				max_j = j;
+			}
+		}
+	}
+
+	fprintf(stderr, "most distant pair: %zu %zu %lf\n", max_i, max_j,
+	        max_value);
+
+	// mroot:
+	// find the halfway point.
+	// add node there and reroot.
+
 
 	matrix_free(&induced);
 }
