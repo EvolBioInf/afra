@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "matrix.h"
 
@@ -16,4 +17,12 @@ int matrix_init(matrix *mx, size_t size) {
 	mx->size = size;
 
 	return 0;
+}
+
+int matrix_copy(matrix *dest, matrix *src) {
+	int check = matrix_init(dest, src->size);
+	if (!check) {
+		memcpy(dest->data, src->data, src->size * sizeof(double));
+	}
+	return check;
 }

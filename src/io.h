@@ -1,1 +1,3 @@
-int read_matrix(FILE *in, size_t *, double **, char ***);
+#include "matrix.h"
+
+matrix read_matrix(FILE *in, char ***out_matrix_names);
