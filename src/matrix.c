@@ -21,8 +21,8 @@ int matrix_init(matrix *mx, size_t size) {
 
 int matrix_copy(matrix *dest, matrix *src) {
 	int check = matrix_init(dest, src->size);
-	if (!check) {
-		memcpy(dest->data, src->data, src->size * sizeof(double));
+	if (check == 0) {
+		memcpy(dest->data, src->data, src->size * src->size * sizeof(double));
 	}
 	return check;
 }

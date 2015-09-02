@@ -7,9 +7,7 @@
 
 tree_node *node_pool;
 
-void newick(tree_node *root);
-
-int neighbor_joining(matrix *distance) {
+int neighbor_joining(matrix *distance, tree_node *out_root) {
 	size_t matrix_size = distance->size;
 	if (matrix_size < 3) return -2;
 
@@ -21,14 +19,18 @@ int neighbor_joining(matrix *distance) {
 	size_t i, j;
 
 	for (i = 0; i < n; i++) {
-		node_pool[i] = LEAF();
+		node_pool[i] = LEAF(i);
 		unjoined_nodes[i] = &node_pool[i];
 	}
 
 	double r[matrix_size];
 
 	matrix local_copy;
-	matrix_copy(&local_copy, distance);
+	int check = matrix_copy(&local_copy, distance);
+	assert(check == 0);
+	assert(local_copy.size == distance->size);
+	assert(memcmp(local_copy.data, distance->data,
+	              matrix_size * matrix_size * sizeof(double)) == 0);
 
 #define M(I, J) (MATRIX_CELL(local_copy, I, J))
 
@@ -71,7 +73,8 @@ int neighbor_joining(matrix *distance) {
 		    .left_branch = unjoined_nodes[min_i],
 		    .right_branch = unjoined_nodes[min_j],
 		    .left_dist = (M(min_i, min_j) + r[min_i] - r[min_j]) / 2.0,
-		    .right_dist = (M(min_i, min_j) - r[min_i] + r[min_j]) / 2.0};
+		    .right_dist = (M(min_i, min_j) - r[min_i] + r[min_j]) / 2.0,
+		    .index = -1};
 
 		*empty_node_ptr++ = branch;
 		unjoined_nodes[min_i] = empty_node_ptr - 1;
@@ -108,19 +111,16 @@ int neighbor_joining(matrix *distance) {
 	}
 
 	// join three remaining nodes
-	tree_node root = {0};
+	tree_node root = {.left_branch = unjoined_nodes[0],
+	                  .right_branch = unjoined_nodes[1],
+	                  .extra_branch = unjoined_nodes[2],
 
-	root.left_branch = unjoined_nodes[0];
-	root.right_branch = unjoined_nodes[1];
-	root.extra_branch = unjoined_nodes[2];
-
-	root.left_dist = (M(0, 1) + M(0, 2) - M(1, 2)) / 2.0;
-	root.right_dist = (M(0, 1) + M(1, 2) - M(0, 2)) / 2.0;
-	root.extra_dist = (M(0, 2) + M(1, 2) - M(0, 1)) / 2.0;
+	                  .left_dist = (M(0, 1) + M(0, 2) - M(1, 2)) / 2.0,
+	                  .right_dist = (M(0, 1) + M(1, 2) - M(0, 2)) / 2.0,
+	                  .extra_dist = (M(0, 2) + M(1, 2) - M(0, 1)) / 2.0};
 
 	*empty_node_ptr++ = root;
-
-	newick(&root);
+	*out_root = root;
 
 	/*
 	// arbitrary root:
@@ -137,12 +137,8 @@ int neighbor_joining(matrix *distance) {
 	// matrix_from_tree(matrix_size, root);
 
 	free(unjoined_nodes);
-	return -1;
+	return 0;
 }
-
-typedef void (*tree_node_processor)(tree_node *);
-
-typedef struct visitor { tree_node_processor pre, process, post; } visitor;
 
 void traverse(tree_node *current, visitor *v) {
 	if (v->pre) {

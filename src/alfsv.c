@@ -37,11 +37,42 @@ int main(int argc, const char *argv[]) {
 		char **matrix_names;
 		matrix distance = read_matrix(file_ptr, &matrix_names);
 
-		neighbor_joining(&distance);
+		tree_node root;
+		neighbor_joining(&distance, &root);
+		newick(&root);
 
-	fail:
 		fclose(file_ptr);
 	}
 
 	return exit_code;
+}
+
+enum { SET_D, SET_A, SET_B, SET_C };
+char *types, type;
+
+void consume(tree_node *current);
+
+int quadruple_stats(matrix *distance, tree_node *root) {
+	// left branch
+	size_t size = distance->size;
+
+	types = malloc(size);
+	memset(types, SET_D, size);
+
+	type= SET_A ; consume(root->left_branch->left_branch);
+	type= SET_B ; consume(root->left_branch->right_branch);
+	type= SET_C ; consume(root->right_branch);
+	// D = not A, B, C;
+}
+
+void consume_process(tree_node *current) {
+	if (!current->left_branch) {
+		types[current->index] = type;
+	}
+}
+
+void consume(tree_node *current) {
+	visitor v = {.pre = NULL, .process = consume_process, .post = NULL};
+
+	traverse(current, consume_process);
 }
