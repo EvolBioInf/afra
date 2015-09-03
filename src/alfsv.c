@@ -104,12 +104,12 @@ void newick_sv(tree_node *root) {
 	} else {
 		printf(":%lf)", root->extra_dist);
 	}
+	printf(";\n");
 }
 
 enum { SET_D, SET_A, SET_B, SET_C };
-char *types, type;
 
-double support(matrix *distance) {
+double support(const matrix *distance, const char *types) {
 	const size_t size = distance->size;
 	size_t set_counts[4] = {0};
 
@@ -155,39 +155,48 @@ double support(matrix *distance) {
 	return 1 - ((double)non_supporting_counter / quadruple_counter);
 }
 
-void consume(tree_node *current);
+typedef struct color_context { char *types, color; } color_context;
+
+void colorize(tree_node *current, color_context *);
 
 int quadruple_stats(matrix *distance, tree_node *root) {
 	// left branch
 	size_t size = distance->size;
 
-	types = malloc(size);
-	memset(types, SET_D, size * sizeof(char));
+	color_context cctx;
 
-	type = SET_A;
-	consume(root->left_branch->left_branch);
-	type = SET_B;
-	consume(root->left_branch->right_branch);
-	type = SET_C;
-	consume(root->right_branch);
+	cctx.types = malloc(size);
+	memset(cctx.types, SET_D, size * sizeof(char));
+
+	cctx.color = SET_A;
+	colorize(root->left_branch->left_branch, &cctx);
+
+	cctx.color = SET_B;
+	colorize(root->left_branch->right_branch, &cctx);
+
+	cctx.color = SET_C;
+	colorize(root->right_branch, &cctx);
 	// D = not A, B, C;
 
-	double d = support(distance);
+	double d = support(distance, cctx.types);
 	root->left_support = d;
 	printf("%lf\n", d);
 
+	free(cctx.types);
 	return 0;
 }
 
-void consume_process(tree_node *current) {
+void colorize_process(tree_node *current, void *vctx) {
+	color_context *ctx = (color_context *)vctx;
+
 	if (!current->left_branch) {
-		types[current->index] = type;
+		ctx->types[current->index] = ctx->color;
 	}
 }
 
-void consume(tree_node *current) {
+void colorize(tree_node *current, color_context *cctx) {
 	if (!current) return;
-	visitor v = {.pre = NULL, .process = consume_process, .post = NULL};
+	ctx_visitor v = {.pre = NULL, .process = colorize_process, .post = NULL};
 
-	traverse(current, &v);
+	ctx_traverse(current, &v, cctx);
 }
