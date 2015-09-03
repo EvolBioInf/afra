@@ -54,6 +54,52 @@ int main(int argc, const char *argv[]) {
 enum { SET_D, SET_A, SET_B, SET_C };
 char *types, type;
 
+double support(matrix *distance) {
+	const size_t size = distance->size;
+	size_t set_counts[4] = {0};
+
+	for (size_t i = 0; i < size; i++) {
+		set_counts[(int)types[i]]++;
+	}
+
+	printf("%zu %zu %zu %zu\n", set_counts[SET_A], set_counts[SET_B],
+	       set_counts[SET_C], set_counts[SET_D]);
+
+	size_t non_supporting_counter = 0;
+	size_t quadruple_counter = 0;
+
+	size_t A = 0, B, C, D;
+	for (; A < size; A++) {
+		if( types[A] != SET_A) continue;
+
+		for (B = 0; B < size; B++) {
+			if( types[B] != SET_B) continue;
+
+			for (C = 0; C < size; C++) {
+				if( types[C] != SET_C) continue;
+
+				for (D = 0; D < size; D++) {
+					if( types[D] != SET_D) continue;
+
+#define M(I, J) (MATRIX_CELL(*distance, I, J))
+
+					quadruple_counter++;
+
+					double D_abcd = M(A, B) + M(C, D);
+					if (((M(A, C) + M(B, D)) < D_abcd) ||
+					    ((M(A, D) + M(B, C)) < D_abcd)) {
+						printf("%zu %zu %zu %zu\n", A, B, C, D);
+						non_supporting_counter++;
+					}
+				}
+			}
+		}
+	}
+
+	printf("%zu of %zu\n", non_supporting_counter, quadruple_counter);
+	return 1 - ((double)non_supporting_counter / quadruple_counter);
+}
+
 void consume(tree_node *current);
 
 int quadruple_stats(matrix *distance, tree_node *root) {
@@ -61,7 +107,7 @@ int quadruple_stats(matrix *distance, tree_node *root) {
 	size_t size = distance->size;
 
 	types = malloc(size);
-	memset(types, SET_D, size);
+	memset(types, SET_D, size*sizeof(char));
 
 	type = SET_A;
 	consume(root->left_branch->left_branch);
@@ -71,59 +117,11 @@ int quadruple_stats(matrix *distance, tree_node *root) {
 	consume(root->right_branch);
 	// D = not A, B, C;
 
-	size_t set_counts[4] = {0};
-	for (size_t i = 0; i < size; i++) {
-		set_counts[(int)types[i]]++;
-	}
+	double d = support(distance);
+	root->left_support = d;
+	printf("%lf\n", d);
 
-	printf("%zu %zu %zu %zu\n", set_counts[SET_A], set_counts[SET_B],
-	       set_counts[SET_C], set_counts[SET_D]);
-
-	size_t non_supporting_counter = 0;
-
-	size_t A = 0, B, C, D;
-	for (; A < size; A++) {
-		for (; types[A] != SET_A && A < size; A++)
-			;
-		if (A >= size) {
-			break;
-		}
-
-		for (B = 0; B < size; B++) {
-			for (; types[B] != SET_B && B < size; B++)
-				;
-			if (B >= size) {
-				break;
-			}
-
-			for (C = 0; C < size; C++) {
-				for (; types[C] != SET_C && C < size; C++)
-					;
-				if (C >= size) {
-					break;
-				}
-
-				for (D = 0; D < size; D++) {
-					for (; types[D] != SET_D && D < size; D++)
-						;
-					if (D >= size) {
-						break;
-					}
-
-#define M(I, J) (MATRIX_CELL(*distance, I, J))
-					printf("%zu %zu %zu %zu\n", A, B, C, D);
-
-					double D_abcd = M(A, B) + M(C, D);
-					if (M(A, C) + M(B, D) < D_abcd ||
-					    M(A, D) + M(B, C) < D_abcd) {
-						non_supporting_counter++;
-					}
-				}
-			}
-		}
-	}
-
-	printf("%zu\n", non_supporting_counter);
+	return 0;
 }
 
 void consume_process(tree_node *current) {

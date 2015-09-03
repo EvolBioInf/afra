@@ -1,4 +1,4 @@
-CFLAGS= -W -Wall -g -O0
+CFLAGS= -W -Wall -g -O0 -fsanitize=address
 CPPFLAGS= -std=gnu99
 
 

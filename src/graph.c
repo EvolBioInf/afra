@@ -270,4 +270,5 @@ int matrix_from_tree(size_t matrix_size, tree_root root) {
 	// add node there and reroot.
 
 	matrix_free(&induced);
+	return 0;
 }

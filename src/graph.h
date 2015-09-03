@@ -14,7 +14,7 @@ typedef struct tree_root {
 	double left_dist, right_dist, extra_dist;
 } tree_root;
 
-#define LEAF(I) ((struct tree_node){.index = (I), 0})
+#define LEAF(I) ((struct tree_node){.index = (I)})
 #define BRANCH(...) ((struct tree_node){__VA_ARGS__})
 
 int neighbor_joining(matrix *, tree_node *);
