@@ -9,6 +9,7 @@
 #include "graph.h"
 
 int quadruple_stats(matrix *distance, tree_node *root);
+void newick_sv(tree_node *root);
 
 int main(int argc, const char *argv[]) {
 
@@ -44,11 +45,65 @@ int main(int argc, const char *argv[]) {
 		newick(&root);
 
 		quadruple_stats(&distance, &root);
+		newick_sv(&root);
 
 		fclose(file_ptr);
 	}
 
 	return exit_code;
+}
+
+void newick_sv_pre(tree_node *current, void *ctx) {
+	if (current->left_branch) {
+		printf("(");
+	}
+}
+
+void newick_sv_process(tree_node *current, void *ctx) {
+	if (current->left_branch) {
+		if (current->left_branch->left_branch) {
+			printf("%d:%lf,", (int)(current->left_support * 100),
+			       current->left_dist);
+		} else {
+			printf(":%lf,", current->left_dist);
+		}
+	} else {
+		printf("%zu", current->index);
+	}
+}
+
+void newick_sv_post(tree_node *current, void *ctx) {
+	if (!current->right_branch) return;
+	if (current->right_branch->right_branch) {
+		printf("%d:%lf)", (int)(current->right_support * 100),
+		       current->right_dist);
+	} else {
+		printf(":%lf)", current->right_dist);
+	}
+}
+
+void newick_sv(tree_node *root) {
+	ctx_visitor v = {.pre = newick_sv_pre,
+	                 .process = newick_sv_process,
+	                 .post = newick_sv_post};
+
+	printf("(");
+	ctx_traverse(root->left_branch, &v, NULL);
+	newick_sv_process(root, NULL);
+
+	ctx_traverse(root->right_branch, &v, NULL);
+	if (root->right_branch && root->right_branch->right_branch) {
+		printf("%d:%lf)", (int)(root->right_support * 100), root->right_dist);
+	} else {
+		printf(":%lf)", root->right_dist);
+	}
+
+	ctx_traverse(root->extra_branch, &v, NULL);
+	if (root->extra_branch && root->extra_branch->extra_branch) {
+		printf("%d:%lf)", (int)(root->extra_support * 100), root->extra_dist);
+	} else {
+		printf(":%lf)", root->extra_dist);
+	}
 }
 
 enum { SET_D, SET_A, SET_B, SET_C };
@@ -70,16 +125,16 @@ double support(matrix *distance) {
 
 	size_t A = 0, B, C, D;
 	for (; A < size; A++) {
-		if( types[A] != SET_A) continue;
+		if (types[A] != SET_A) continue;
 
 		for (B = 0; B < size; B++) {
-			if( types[B] != SET_B) continue;
+			if (types[B] != SET_B) continue;
 
 			for (C = 0; C < size; C++) {
-				if( types[C] != SET_C) continue;
+				if (types[C] != SET_C) continue;
 
 				for (D = 0; D < size; D++) {
-					if( types[D] != SET_D) continue;
+					if (types[D] != SET_D) continue;
 
 #define M(I, J) (MATRIX_CELL(*distance, I, J))
 
@@ -88,7 +143,7 @@ double support(matrix *distance) {
 					double D_abcd = M(A, B) + M(C, D);
 					if (((M(A, C) + M(B, D)) < D_abcd) ||
 					    ((M(A, D) + M(B, C)) < D_abcd)) {
-						printf("%zu %zu %zu %zu\n", A, B, C, D);
+						// printf("%zu %zu %zu %zu\n", A, B, C, D);
 						non_supporting_counter++;
 					}
 				}
@@ -107,7 +162,7 @@ int quadruple_stats(matrix *distance, tree_node *root) {
 	size_t size = distance->size;
 
 	types = malloc(size);
-	memset(types, SET_D, size*sizeof(char));
+	memset(types, SET_D, size * sizeof(char));
 
 	type = SET_A;
 	consume(root->left_branch->left_branch);

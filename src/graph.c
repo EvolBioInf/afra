@@ -158,6 +158,24 @@ void traverse(tree_node *current, visitor *v) {
 	}
 }
 
+void ctx_traverse(tree_node *current, ctx_visitor *v, void *context) {
+	if (v->pre) {
+		v->pre(current, context);
+	}
+	if (current->left_branch) {
+		ctx_traverse(current->left_branch, v, context);
+	}
+	if (v->process) {
+		v->process(current, context);
+	}
+	if (current->right_branch) {
+		ctx_traverse(current->right_branch, v, context);
+	}
+	if (v->post) {
+		v->post(current, context);
+	}
+}
+
 void newick_pre(tree_node *current) {
 	if (current->left_branch) printf("(");
 }

@@ -23,7 +23,11 @@ int matrix_from_tree(size_t matrix_size, tree_root root);
 void newick(tree_node *root);
 
 typedef void (*tree_node_processor)(tree_node *);
-
 typedef struct visitor { tree_node_processor pre, process, post; } visitor;
-
 void traverse(tree_node *current, visitor *v);
+
+typedef void (*tree_node_processor_context)(tree_node *, void *);
+typedef struct ctx_visitor {
+	tree_node_processor_context pre, process, post;
+} ctx_visitor;
+void ctx_traverse(tree_node *current, ctx_visitor *v, void *);
