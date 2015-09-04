@@ -8,7 +8,7 @@
 #include "matrix.h"
 #include "graph.h"
 
-int quadruple_stats(matrix *distance, tree_node *root);
+int quad_root(matrix *distance, tree_node *root);
 void newick_sv(tree_node *root);
 
 int main(int argc, const char *argv[]) {
@@ -44,7 +44,7 @@ int main(int argc, const char *argv[]) {
 		neighbor_joining(&distance, &root);
 		newick(&root);
 
-		quadruple_stats(&distance, &root);
+		quad_root(&distance, &root);
 		newick_sv(&root);
 
 		fclose(file_ptr);
@@ -93,13 +93,13 @@ void newick_sv(tree_node *root) {
 
 	ctx_traverse(root->right_branch, &v, NULL);
 	if (root->right_branch && root->right_branch->right_branch) {
-		printf("%d:%lf)", (int)(root->right_support * 100), root->right_dist);
+		printf("%d:%lf,", (int)(root->right_support * 100), root->right_dist);
 	} else {
-		printf(":%lf)", root->right_dist);
+		printf(":%lf,", root->right_dist);
 	}
 
 	ctx_traverse(root->extra_branch, &v, NULL);
-	if (root->extra_branch && root->extra_branch->extra_branch) {
+	if (root->extra_branch && root->extra_branch->left_branch) {
 		printf("%d:%lf)", (int)(root->extra_support * 100), root->extra_dist);
 	} else {
 		printf(":%lf)", root->extra_dist);
@@ -111,14 +111,16 @@ enum { SET_D, SET_A, SET_B, SET_C };
 
 double support(const matrix *distance, const char *types) {
 	const size_t size = distance->size;
+
+	/*
 	size_t set_counts[4] = {0};
 
 	for (size_t i = 0; i < size; i++) {
-		set_counts[(int)types[i]]++;
+	    set_counts[(int)types[i]]++;
 	}
 
 	printf("%zu %zu %zu %zu\n", set_counts[SET_A], set_counts[SET_B],
-	       set_counts[SET_C], set_counts[SET_D]);
+	       set_counts[SET_C], set_counts[SET_D]); */
 
 	size_t non_supporting_counter = 0;
 	size_t quadruple_counter = 0;
@@ -151,7 +153,7 @@ double support(const matrix *distance, const char *types) {
 		}
 	}
 
-	printf("%zu of %zu\n", non_supporting_counter, quadruple_counter);
+	// printf("%zu of %zu\n", non_supporting_counter, quadruple_counter);
 	return 1 - ((double)non_supporting_counter / quadruple_counter);
 }
 
@@ -159,30 +161,95 @@ typedef struct color_context { char *types, color; } color_context;
 
 void colorize(tree_node *current, color_context *);
 
-int quadruple_stats(matrix *distance, tree_node *root) {
-	// left branch
-	size_t size = distance->size;
-
+void quad_left(tree_node *current, matrix *distance) {
+	if (!current->left_branch || !current->left_branch->left_branch) return;
 	color_context cctx;
 
-	cctx.types = malloc(size);
-	memset(cctx.types, SET_D, size * sizeof(char));
+	cctx.types = malloc(distance->size);
+	memset(cctx.types, SET_D, distance->size);
 
 	cctx.color = SET_A;
-	colorize(root->left_branch->left_branch, &cctx);
+	colorize(current->left_branch->left_branch, &cctx);
 
 	cctx.color = SET_B;
-	colorize(root->left_branch->right_branch, &cctx);
+	colorize(current->left_branch->right_branch, &cctx);
 
 	cctx.color = SET_C;
-	colorize(root->right_branch, &cctx);
+	colorize(current->right_branch, &cctx);
 	// D = not A, B, C;
 
 	double d = support(distance, cctx.types);
-	root->left_support = d;
+	current->left_support = d;
 	printf("%lf\n", d);
 
 	free(cctx.types);
+}
+
+void quad_right(tree_node *current, matrix *distance) {
+	if (!current->left_branch || !current->right_branch->left_branch) return;
+	color_context cctx;
+
+	cctx.types = malloc(distance->size);
+	memset(cctx.types, SET_D, distance->size);
+
+	cctx.color = SET_A;
+	colorize(current->right_branch->left_branch, &cctx);
+
+	cctx.color = SET_B;
+	colorize(current->right_branch->right_branch, &cctx);
+
+	cctx.color = SET_C;
+	colorize(current->left_branch, &cctx);
+	// D = not A, B, C;
+
+	double d = support(distance, cctx.types);
+	current->right_support = d;
+	printf("%lf\n", d);
+
+	free(cctx.types);
+}
+
+void quad_node(tree_node *current, void *ctx) {
+	if (!current->left_branch) return;
+
+	// left branch
+	quad_left(current, (matrix *)ctx);
+
+	// right branch
+	quad_right(current, (matrix *)ctx);
+}
+
+int quad_root(matrix *distance, tree_node *root) {
+
+	ctx_visitor v = {.pre = NULL, .process = quad_node, .post = NULL};
+
+	ctx_traverse(root, &v, distance);
+	ctx_traverse(root->extra_branch, &v, distance);
+
+	if (root->extra_branch->left_branch) {
+		// Support Value for Root→Extra
+		color_context cctx;
+
+		cctx.types = malloc(distance->size);
+		memset(cctx.types, SET_D, distance->size);
+
+		cctx.color = SET_A;
+		colorize(root->extra_branch->left_branch, &cctx);
+
+		cctx.color = SET_B;
+		colorize(root->extra_branch->right_branch, &cctx);
+
+		cctx.color = SET_C;
+		colorize(root->left_branch, &cctx);
+		// D = not A, B, C;
+
+		double d = support(distance, cctx.types);
+		root->extra_support = d;
+		printf("%lf\n", d);
+
+		free(cctx.types);
+	}
+
 	return 0;
 }
 
