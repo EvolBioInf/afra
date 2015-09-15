@@ -9,7 +9,7 @@
 #include "graph.h"
 
 int quad_root(matrix *distance, tree_node *root);
-void newick_sv(tree_node *root);
+void newick_sv(tree_node *, char**);
 
 int main(int argc, const char *argv[]) {
 
@@ -42,10 +42,10 @@ int main(int argc, const char *argv[]) {
 
 		tree_node root;
 		neighbor_joining(&distance, &root);
-		newick(&root);
+		// newick(&root);
 
 		quad_root(&distance, &root);
-		newick_sv(&root);
+		newick_sv(&root, matrix_names);
 
 		fclose(file_ptr);
 	}
@@ -68,7 +68,7 @@ void newick_sv_process(tree_node *current, void *ctx) {
 			printf(":%lf,", current->left_dist);
 		}
 	} else {
-		printf("%zu", current->index);
+		printf("%s", ((char**)ctx)[current->index]);
 	}
 }
 
@@ -82,23 +82,23 @@ void newick_sv_post(tree_node *current, void *ctx) {
 	}
 }
 
-void newick_sv(tree_node *root) {
+void newick_sv(tree_node *root, char **names) {
 	ctx_visitor v = {.pre = newick_sv_pre,
 	                 .process = newick_sv_process,
 	                 .post = newick_sv_post};
 
 	printf("(");
-	ctx_traverse(root->left_branch, &v, NULL);
-	newick_sv_process(root, NULL);
+	ctx_traverse(root->left_branch, &v, names);
+	newick_sv_process(root, names);
 
-	ctx_traverse(root->right_branch, &v, NULL);
+	ctx_traverse(root->right_branch, &v, names);
 	if (root->right_branch && root->right_branch->right_branch) {
 		printf("%d:%lf,", (int)(root->right_support * 100), root->right_dist);
 	} else {
 		printf(":%lf,", root->right_dist);
 	}
 
-	ctx_traverse(root->extra_branch, &v, NULL);
+	ctx_traverse(root->extra_branch, &v, names);
 	if (root->extra_branch && root->extra_branch->left_branch) {
 		printf("%d:%lf)", (int)(root->extra_support * 100), root->extra_dist);
 	} else {
@@ -180,7 +180,7 @@ void quad_left(tree_node *current, matrix *distance) {
 
 	double d = support(distance, cctx.types);
 	current->left_support = d;
-	printf("%lf\n", d);
+	// printf("%lf\n", d);
 
 	free(cctx.types);
 }
@@ -204,7 +204,7 @@ void quad_right(tree_node *current, matrix *distance) {
 
 	double d = support(distance, cctx.types);
 	current->right_support = d;
-	printf("%lf\n", d);
+	// printf("%lf\n", d);
 
 	free(cctx.types);
 }
@@ -245,7 +245,7 @@ int quad_root(matrix *distance, tree_node *root) {
 
 		double d = support(distance, cctx.types);
 		root->extra_support = d;
-		printf("%lf\n", d);
+		// printf("%lf\n", d);
 
 		free(cctx.types);
 	}
