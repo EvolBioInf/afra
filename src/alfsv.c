@@ -9,7 +9,7 @@
 #include "graph.h"
 
 int quad_root(matrix *distance, tree_node *root);
-void newick_sv(tree_node *, char**);
+void newick_sv(tree_node *, char **);
 
 int main(int argc, const char *argv[]) {
 
@@ -68,7 +68,7 @@ void newick_sv_process(tree_node *current, void *ctx) {
 			printf(":%lf,", current->left_dist);
 		}
 	} else {
-		printf("%s", ((char**)ctx)[current->index]);
+		printf("%s", ((char **)ctx)[current->index]);
 	}
 }
 
