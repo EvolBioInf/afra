@@ -5,7 +5,6 @@
 
 #include "matrix.h"
 
-static char *buffer = NULL;
 matrix read_matrix(FILE *in, char ***out_matrix_names) {
 	size_t matrix_size;
 	char **matrix_names;
