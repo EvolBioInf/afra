@@ -1,6 +1,7 @@
 CFLAGS= -W -Wall -g -O0 -fsanitize=address
 CPPFLAGS= -std=gnu99
 
+.PHONY: all clean
 
 all: alfsv
 
