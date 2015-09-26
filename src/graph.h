@@ -27,7 +27,7 @@ typedef struct visitor { tree_node_processor pre, process, post; } visitor;
 void traverse(tree_node *current, visitor *v);
 
 typedef void (*tree_node_processor_context)(tree_node *, void *);
-typedef struct ctx_visitor {
+typedef struct visitor_ctx {
 	tree_node_processor_context pre, process, post;
-} ctx_visitor;
-void ctx_traverse(tree_node *current, ctx_visitor *v, void *);
+} visitor_ctx;
+void traverse_ctx(tree_node *current, visitor_ctx *v, void *);
