@@ -127,24 +127,6 @@ int neighbor_joining(matrix *distance, tree_node *out_root) {
 	return 0;
 }
 
-void traverse(tree_node *current, visitor *v) {
-	if (v->pre) {
-		v->pre(current);
-	}
-	if (current->left_branch) {
-		traverse(current->left_branch, v);
-	}
-	if (v->process) {
-		v->process(current);
-	}
-	if (current->right_branch) {
-		traverse(current->right_branch, v);
-	}
-	if (v->post) {
-		v->post(current);
-	}
-}
-
 void traverse_ctx(tree_node *current, visitor_ctx *v, void *context) {
 	if (v->pre) {
 		v->pre(current, context);
@@ -161,33 +143,4 @@ void traverse_ctx(tree_node *current, visitor_ctx *v, void *context) {
 	if (v->post) {
 		v->post(current, context);
 	}
-}
-
-void newick_pre(tree_node *current) {
-	if (current->left_branch) printf("(");
-}
-
-void newick_post(tree_node *current) {
-	if (current->left_branch) printf(":%lf)", current->right_dist);
-}
-
-void newick_process(tree_node *current) {
-	if (current->left_branch) {
-		printf(":%lf,", current->left_dist);
-	} else {
-		printf("%zu", current - node_pool);
-	}
-}
-
-void newick(tree_node *root) {
-	visitor v = {
-	    .pre = newick_pre, .process = newick_process, .post = newick_post};
-
-	printf("(");
-	traverse(root->left_branch, &v);
-	printf(":%lf,", root->left_dist);
-	traverse(root->right_branch, &v);
-	printf(":%lf,", root->right_dist);
-	traverse(root->extra_branch, &v);
-	printf(":%lf);\n", root->extra_dist);
 }
