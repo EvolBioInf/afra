@@ -25,7 +25,10 @@ typedef struct tree_s {
 	tree_root root;
 } tree_s;
 
-int neighbor_joining(matrix *distance, tree_s *out_tree) ;
+int tree_init(tree_s *baum, size_t size);
+void tree_free(tree_s *baum);
+
+int neighbor_joining(matrix *distance, tree_s *out_tree);
 
 typedef void (*tree_node_processor_context)(tree_node *, void *);
 typedef struct visitor_ctx {

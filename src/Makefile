@@ -1,4 +1,4 @@
-CFLAGS= -W -Wall -g -Os -fsanitize=address -fms-extensions
+CFLAGS= -W -Wall -g -O0 -fsanitize=address -fms-extensions
 CPPFLAGS= -std=gnu99
 
 .PHONY: all clean

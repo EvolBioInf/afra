@@ -40,7 +40,6 @@ int main(int argc, const char *argv[]) {
 		char **matrix_names;
 		matrix distance = read_matrix(file_ptr, &matrix_names);
 
-		tree_node root;
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 		// newick(&root);
@@ -49,6 +48,11 @@ int main(int argc, const char *argv[]) {
 		newick_sv(&tree.root, matrix_names);
 
 		fclose(file_ptr);
+		tree_free(&tree);
+		for (size_t i = 0; i < distance.size; i++) {
+			free(matrix_names[i]);
+		}
+		free(matrix_names);
 	}
 
 	return exit_code;

@@ -6,22 +6,20 @@
 #include "graph.h"
 #include "matrix.h"
 
-int tree_init(tree_s *baum, size_t size){
-	if(!baum || !size) return 1;
+int tree_init(tree_s *baum, size_t size) {
+	if (!baum || !size) return 1;
 	*baum = (tree_s){};
 	baum->pool = malloc(2 * size * sizeof(tree_node));
-	if(!baum->pool) return errno;
+	if (!baum->pool) return errno;
 	baum->size = size;
 	return 0;
 }
 
-void tree_free(tree_s *baum){
-	if(!baum) return;
+void tree_free(tree_s *baum) {
+	if (!baum) return;
 	free(baum->pool);
-	*baum=(tree_s){};
+	*baum = (tree_s){};
 }
-
-tree_node *node_pool;
 
 int neighbor_joining(matrix *distance, tree_s *out_tree) {
 	size_t matrix_size = distance->size;
@@ -30,9 +28,9 @@ int neighbor_joining(matrix *distance, tree_s *out_tree) {
 	int check;
 
 	check = tree_init(out_tree, matrix_size);
-	if(check) return check;
+	if (check) return check;
 
-	node_pool = out_tree->pool;
+	tree_node *node_pool = out_tree->pool;
 	tree_node *empty_node_ptr = &node_pool[matrix_size];
 	tree_node **unjoined_nodes = malloc(matrix_size * sizeof(tree_node *));
 
