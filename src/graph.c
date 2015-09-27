@@ -123,6 +123,7 @@ int neighbor_joining(matrix *distance, tree_node *out_root) {
 	*out_root = root;
 
 	free(unjoined_nodes);
+	matrix_free(&local_copy);
 	return 0;
 }
 
