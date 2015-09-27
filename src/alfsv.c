@@ -8,8 +8,8 @@
 #include "matrix.h"
 #include "graph.h"
 
-int quad_root(matrix *distance, tree_node *root);
-void newick_sv(tree_node *, char **);
+int quad_root(matrix *distance, tree_root *root);
+void newick_sv(tree_root *, char **);
 
 int main(int argc, const char *argv[]) {
 
@@ -41,12 +41,12 @@ int main(int argc, const char *argv[]) {
 		matrix distance = read_matrix(file_ptr, &matrix_names);
 
 		tree_node root;
-		tree baum;
-		neighbor_joining(&distance, &root, &baum);
+		tree_s tree;
+		neighbor_joining(&distance, &tree);
 		// newick(&root);
 
-		quad_root(&distance, &root);
-		newick_sv(&root, matrix_names);
+		quad_root(&distance, &tree.root);
+		newick_sv(&tree.root, matrix_names);
 
 		fclose(file_ptr);
 	}
@@ -83,7 +83,7 @@ void newick_sv_post(tree_node *current, void *ctx) {
 	}
 }
 
-void newick_sv(tree_node *root, char **names) {
+void newick_sv(tree_root *root, char **names) {
 	visitor_ctx v = {.pre = newick_sv_pre,
 	                 .process = newick_sv_process,
 	                 .post = newick_sv_post};
@@ -220,7 +220,7 @@ void quad_node(tree_node *current, void *ctx) {
 	quad_right(current, (matrix *)ctx);
 }
 
-int quad_root(matrix *distance, tree_node *root) {
+int quad_root(matrix *distance, tree_root *root) {
 
 	visitor_ctx v = {.pre = NULL, .process = quad_node, .post = NULL};
 

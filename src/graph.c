@@ -6,24 +6,24 @@
 #include "graph.h"
 #include "matrix.h"
 
-int tree_init(tree *baum, size_t size){
+int tree_init(tree_s *baum, size_t size){
 	if(!baum || !size) return 1;
-	*baum = (tree){};
+	*baum = (tree_s){};
 	baum->pool = malloc(2 * size * sizeof(tree_node));
 	if(!baum->pool) return errno;
 	baum->size = size;
 	return 0;
 }
 
-void tree_free(tree *baum){
+void tree_free(tree_s *baum){
 	if(!baum) return;
 	free(baum->pool);
-	*baum=(tree){};
+	*baum=(tree_s){};
 }
 
 tree_node *node_pool;
 
-int neighbor_joining(matrix *distance, tree_node *out_root, tree *out_tree) {
+int neighbor_joining(matrix *distance, tree_s *out_tree) {
 	size_t matrix_size = distance->size;
 	if (matrix_size < 3 || !out_tree) return -2;
 
@@ -132,7 +132,7 @@ int neighbor_joining(matrix *distance, tree_node *out_root, tree *out_tree) {
 	}
 
 	// join three remaining nodes
-	tree_node root = {.left_branch = unjoined_nodes[0],
+	tree_root root = {.left_branch = unjoined_nodes[0],
 	                  .right_branch = unjoined_nodes[1],
 	                  .extra_branch = unjoined_nodes[2],
 
@@ -140,8 +140,8 @@ int neighbor_joining(matrix *distance, tree_node *out_root, tree *out_tree) {
 	                  .right_dist = (M(0, 1) + M(1, 2) - M(0, 2)) / 2.0,
 	                  .extra_dist = (M(0, 2) + M(1, 2) - M(0, 1)) / 2.0};
 
-	*empty_node_ptr++ = root;
-	*out_root = root;
+	//*empty_node_ptr++ = root;
+	out_tree->root = root;
 
 	free(unjoined_nodes);
 	matrix_free(&local_copy);
