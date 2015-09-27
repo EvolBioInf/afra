@@ -5,7 +5,7 @@ CPPFLAGS= -std=gnu99
 
 all: alfsv
 
-alfsv: alfsv.o io.o matrix.o graph.o
+alfsv: alfsv.o io.o matrix.o graph.o quadruple.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 check: alfsv
