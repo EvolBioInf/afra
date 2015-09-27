@@ -41,7 +41,8 @@ int main(int argc, const char *argv[]) {
 		matrix distance = read_matrix(file_ptr, &matrix_names);
 
 		tree_node root;
-		neighbor_joining(&distance, &root);
+		tree baum;
+		neighbor_joining(&distance, &root, &baum);
 		// newick(&root);
 
 		quad_root(&distance, &root);

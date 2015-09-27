@@ -1,17 +1,38 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "graph.h"
 #include "matrix.h"
 
+int tree_init(tree *baum, size_t size){
+	if(!baum || !size) return 1;
+	*baum = (tree){};
+	baum->pool = malloc(2 * size * sizeof(tree_node));
+	if(!baum->pool) return errno;
+	baum->size = size;
+	return 0;
+}
+
+void tree_free(tree *baum){
+	if(!baum) return;
+	free(baum->pool);
+	*baum=(tree){};
+}
+
 tree_node *node_pool;
 
-int neighbor_joining(matrix *distance, tree_node *out_root) {
+int neighbor_joining(matrix *distance, tree_node *out_root, tree *out_tree) {
 	size_t matrix_size = distance->size;
-	if (matrix_size < 3) return -2;
+	if (matrix_size < 3 || !out_tree) return -2;
 
-	node_pool = malloc(2 * matrix_size * sizeof(tree_node));
+	int check;
+
+	check = tree_init(out_tree, matrix_size);
+	if(check) return check;
+
+	node_pool = out_tree->pool;
 	tree_node *empty_node_ptr = &node_pool[matrix_size];
 	tree_node **unjoined_nodes = malloc(matrix_size * sizeof(tree_node *));
 
@@ -26,7 +47,7 @@ int neighbor_joining(matrix *distance, tree_node *out_root) {
 	double r[matrix_size];
 
 	matrix local_copy;
-	int check = matrix_copy(&local_copy, distance);
+	check = matrix_copy(&local_copy, distance);
 	assert(check == 0);
 	assert(local_copy.size == distance->size);
 	assert(memcmp(local_copy.data, distance->data,

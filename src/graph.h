@@ -12,15 +12,19 @@ typedef struct tree_node {
 typedef struct tree_root {
 	tree_node *left_branch, *right_branch, *extra_branch;
 	double left_dist, right_dist, extra_dist;
+	double left_support, right_support, extra_support;
 } tree_root;
 
 #define LEAF(I) ((struct tree_node){.index = (I)})
 #define BRANCH(...) ((struct tree_node){__VA_ARGS__})
 
-int neighbor_joining(matrix *, tree_node *);
-int matrix_from_tree(size_t matrix_size, tree_root root);
+typedef struct tree {
+	size_t size;
+	tree_node *pool;
+	tree_root root;
+} tree;
 
-void newick(tree_node *root);
+int neighbor_joining(matrix *distance, tree_node *out_root, tree *out_tree) ;
 
 typedef void (*tree_node_processor_context)(tree_node *, void *);
 typedef struct visitor_ctx {
