@@ -1,5 +1,7 @@
-CFLAGS= -W -Wall -g -O0 -fsanitize=address -fms-extensions
-CPPFLAGS= -std=gnu99
+#!/bin/make -f
+
+CFLAGS= -W -Wall -g -O1 -fsanitize=address -fms-extensions -Wno-microsoft
+CPPFLAGS= -std=c11
 
 .PHONY: all clean check
 

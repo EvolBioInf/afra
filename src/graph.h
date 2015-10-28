@@ -10,7 +10,10 @@ typedef struct tree_node {
 } tree_node;
 
 typedef struct tree_root {
-	struct tree_node;
+	union {
+		struct tree_node;
+		struct tree_node as_tree_node;
+	};
 	tree_node *extra_branch;
 	double extra_dist;
 	double extra_support;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "io.h"
 #include "matrix.h"
@@ -94,7 +95,7 @@ void newick_sv(tree_root *root, char **names) {
 
 	printf("(");
 	traverse_ctx(root->left_branch, &v, names);
-	newick_sv_process(root, names);
+	newick_sv_process(&(root->as_tree_node), names);
 
 	traverse_ctx(root->right_branch, &v, names);
 	if (root->right_branch && root->right_branch->right_branch) {
