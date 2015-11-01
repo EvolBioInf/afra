@@ -110,7 +110,7 @@ int quad_root(matrix *distance, tree_root *root) {
 
 	visitor_ctx v = {.pre = NULL, .process = quad_node, .post = NULL};
 
-	traverse_ctx(root, &v, distance);
+	traverse_ctx(&root->as_tree_node, &v, distance);
 	traverse_ctx(root->extra_branch, &v, distance);
 
 	if (root->extra_branch->left_branch) {
