@@ -41,6 +41,10 @@ int main(int argc, const char *argv[]) {
 		char **matrix_names;
 		matrix distance = read_matrix(file_ptr, &matrix_names);
 
+		if (distance.size < 4) {
+			errx(1, "this program requires at least four taxa.");
+		}
+
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 		// newick(&root);
