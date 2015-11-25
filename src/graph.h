@@ -1,3 +1,6 @@
+#ifndef GRAPH_H
+#define GRAPH_H
+
 #include <stdio.h>
 
 #include "matrix.h"
@@ -38,3 +41,5 @@ typedef struct visitor_ctx {
 	tree_node_processor_context pre, process, post;
 } visitor_ctx;
 void traverse_ctx(tree_node *current, visitor_ctx *v, void *);
+
+#endif
