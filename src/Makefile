@@ -7,7 +7,7 @@ CPPFLAGS= -std=c11
 
 all: alfsv
 
-alfsv: alfsv.o io.o matrix.o graph.o quadruple.o
+alfsv: alfsv.o io.o matrix.o graph.o quartet.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 check: alfsv

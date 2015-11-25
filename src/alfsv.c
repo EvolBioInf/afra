@@ -8,8 +8,8 @@
 #include "io.h"
 #include "matrix.h"
 #include "graph.h"
+#include "quartet.h"
 
-int quad_root(matrix *distance, tree_root *root);
 void newick_sv(tree_root *, char **);
 
 int main(int argc, const char *argv[]) {

@@ -1,5 +1,5 @@
-#ifndef QUADRUPLE_H
-#define QUADRUPLE_H
+#ifndef QUARTET_H
+#define QUARTET_H
 
 #include "graph.h"
 #include "matrix.h"

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "quadruple.h"
+#include "quartet.h"
 
 enum { SET_D, SET_A, SET_B, SET_C };
 
@@ -10,7 +10,7 @@ double support(const matrix *distance, const char *types) {
 	const size_t size = distance->size;
 
 	size_t non_supporting_counter = 0;
-	size_t quadruple_counter = 0;
+	size_t quartet_counter = 0;
 
 	size_t A = 0, B, C, D;
 	for (; A < size; A++) {
@@ -27,7 +27,7 @@ double support(const matrix *distance, const char *types) {
 
 #define M(I, J) (MATRIX_CELL(*distance, I, J))
 
-					quadruple_counter++;
+					quartet_counter++;
 
 					double D_abcd = M(A, B) + M(C, D);
 					if (((M(A, C) + M(B, D)) < D_abcd) ||
@@ -40,8 +40,8 @@ double support(const matrix *distance, const char *types) {
 		}
 	}
 
-	// printf("%zu of %zu\n", non_supporting_counter, quadruple_counter);
-	return 1 - ((double)non_supporting_counter / quadruple_counter);
+	// printf("%zu of %zu\n", non_supporting_counter, quartet_counter);
+	return 1 - ((double)non_supporting_counter / quartet_counter);
 }
 
 typedef struct color_context { char *types, color; } color_context;
