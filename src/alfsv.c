@@ -15,11 +15,21 @@ void consense(char **matrix_names, matrix distance, tree_root root);
 int main(int argc, const char *argv[]) {
 
 	if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 'h') {
-		fprintf(stderr, "Usage: %s [FASTA...]\n", argv[0]);
+		fprintf(stderr, "Usage: %s quartet|consense [FASTA...]\n", argv[0]);
 		return 1;
 	}
 
 	argv += 1;
+
+	enum {QUARTET,CONSENSE} mode;
+
+	if(strcmp(*argv,"quartet") ==  0){
+		mode = QUARTET;
+	} else if (strcmp(*argv,"consense") == 0){
+		mode = CONSENSE;
+	} else {
+		errx(1, "invalid mode. Should be one of 'quartet' or 'consense'.");
+	}
 
 	int firsttime = 1;
 	int exit_code = EXIT_SUCCESS;
@@ -48,7 +58,12 @@ int main(int argc, const char *argv[]) {
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 
-		consense(matrix_names, distance, tree.root);
+		if( mode == consense){
+			consense(matrix_names, distance, tree.root);
+		} else {
+			quad_root(&distance, &tree.root);
+			newick_sv(&tree.root, matrix_names);
+		}
 
 		fclose(file_ptr);
 		tree_free(&tree);
