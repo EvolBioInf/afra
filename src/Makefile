@@ -1,8 +1,6 @@
 #!/bin/make -f
 
-CC=clang
-
-CFLAGS= -W -Wall -g -O1 -fsanitize=address -fms-extensions -Wno-microsoft -Wno-missing-field-initializers
+CFLAGS= -W -Wall -g -O1 -fms-extensions -Wno-microsoft -Wno-missing-field-initializers
 CPPFLAGS= -std=c11
 
 .PHONY: all clean check
