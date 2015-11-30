@@ -3,13 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "io.h"
 #include "matrix.h"
 #include "graph.h"
+#include "quartet.h"
 
-int quad_root(matrix *distance, tree_node *root);
-void newick_sv(tree_node *, char**);
+void newick_sv(tree_root *, char **);
 
 void print_species(char **names, size_t n);
 void consense( char **matrix_names, matrix distance, tree_node root );
@@ -25,6 +26,7 @@ int main(int argc, const char *argv[]) {
 
 	int firsttime = 1;
 	int exit_code = EXIT_SUCCESS;
+	int consense;
 
 	for (;; firsttime = 0) {
 		FILE *file_ptr;
@@ -43,13 +45,24 @@ int main(int argc, const char *argv[]) {
 		char **matrix_names;
 		matrix distance = read_matrix(file_ptr, &matrix_names);
 
-		tree_node root;
-		neighbor_joining(&distance, &root);
+		if (distance.size < 4) {
+			errx(1, "this program requires at least four taxa.");
+		}
 
-		consense( matrix_names, distance, root );
+		tree_s tree;
+		neighbor_joining(&distance, &tree);
+
+		if(consense){
+
+		}
+
+		consense( matrix_names, &distance, &tree.root );
 
 		fclose(file_ptr);
-
+		tree_free(&tree);
+		for (size_t i = 0; i < distance.size; i++) {
+			free(matrix_names[i]);
+		}
 		free(matrix_names);
 	}
 

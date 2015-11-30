@@ -1,33 +1,45 @@
+#ifndef GRAPH_H
+#define GRAPH_H
+
 #include <stdio.h>
 
 #include "matrix.h"
 
 typedef struct tree_node {
-	struct tree_node *left_branch, *right_branch, *extra_branch;
-	double left_dist, right_dist, extra_dist;
-	double left_support, right_support, extra_support;
+	struct tree_node *left_branch, *right_branch;
+	double left_dist, right_dist;
+	double left_support, right_support;
 	ssize_t index;
 } tree_node;
 
 typedef struct tree_root {
-	tree_node *left_branch, *right_branch, *extra_branch;
-	double left_dist, right_dist, extra_dist;
+	union {
+		struct tree_node;
+		struct tree_node as_tree_node;
+	};
+	tree_node *extra_branch;
+	double extra_dist;
+	double extra_support;
 } tree_root;
 
 #define LEAF(I) ((struct tree_node){.index = (I)})
 #define BRANCH(...) ((struct tree_node){__VA_ARGS__})
 
-int neighbor_joining(matrix *, tree_node *);
-int matrix_from_tree(size_t matrix_size, tree_root root);
+typedef struct tree_s {
+	size_t size;
+	tree_node *pool;
+	tree_root root;
+} tree_s;
 
-void newick(tree_node *root);
+int tree_init(tree_s *baum, size_t size);
+void tree_free(tree_s *baum);
 
-typedef void (*tree_node_processor)(tree_node *);
-typedef struct visitor { tree_node_processor pre, process, post; } visitor;
-void traverse(tree_node *current, visitor *v);
+int neighbor_joining(matrix *distance, tree_s *out_tree);
 
 typedef void (*tree_node_processor_context)(tree_node *, void *);
-typedef struct ctx_visitor {
+typedef struct visitor_ctx {
 	tree_node_processor_context pre, process, post;
-} ctx_visitor;
-void ctx_traverse(tree_node *current, ctx_visitor *v, void *);
+} visitor_ctx;
+void traverse_ctx(tree_node *current, visitor_ctx *v, void *);
+
+#endif
