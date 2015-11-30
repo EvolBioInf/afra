@@ -31,6 +31,8 @@ int main(int argc, const char *argv[]) {
 		errx(1, "invalid mode. Should be one of 'quartet' or 'consense'.");
 	}
 
+	argv += 1;
+
 	int firsttime = 1;
 	int exit_code = EXIT_SUCCESS;
 
