@@ -146,22 +146,3 @@ void print_species(char **names, size_t n) {
 		printf("  %zu. %s\n", i + 1, names[i]);
 	}
 }
-
-void print_sets(tree_root *root, color_context *cctx) {}
-
-void print_sets_node(tree_node *current, void *ctx) {
-	size_t size;
-	color_context cctx;
-	cctx.types = malloc(size);
-	memset(cctx.types, SET_D, size);
-
-	cctx.color = SET_A;
-	colorize(current->left_branch, &cctx);
-
-	for (size_t i = 0; i < size; i++) {
-		printf("%c", cctx.types[i] == SET_A ? '*' : '.');
-	}
-	printf("                     %lf\n", current->left_dist);
-
-	free(cctx.types);
-}
