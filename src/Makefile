@@ -1,5 +1,7 @@
 #!/bin/make -f
 
+CC=clang
+
 CFLAGS= -W -Wall -g -O1 -fsanitize=address -fms-extensions -Wno-microsoft -Wno-missing-field-initializers
 CPPFLAGS= -std=c11
 
@@ -7,7 +9,7 @@ CPPFLAGS= -std=c11
 
 all: alfsv
 
-alfsv: alfsv.o io.o matrix.o graph.o quartet.o
+alfsv: alfsv.o io.o matrix.o graph.o consense.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 check: alfsv

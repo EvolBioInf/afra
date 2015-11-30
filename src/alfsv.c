@@ -10,10 +10,8 @@
 #include "graph.h"
 #include "quartet.h"
 
-void newick_sv(tree_root *, char **);
 
-void print_species(char **names, size_t n);
-void consense( char **matrix_names, matrix distance, tree_node root );
+void consense( char **matrix_names, matrix distance, tree_root root );
 
 int main(int argc, const char *argv[]) {
 
@@ -26,7 +24,6 @@ int main(int argc, const char *argv[]) {
 
 	int firsttime = 1;
 	int exit_code = EXIT_SUCCESS;
-	int consense;
 
 	for (;; firsttime = 0) {
 		FILE *file_ptr;
@@ -52,11 +49,7 @@ int main(int argc, const char *argv[]) {
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 
-		if(consense){
-
-		}
-
-		consense( matrix_names, &distance, &tree.root );
+		consense( matrix_names, distance, tree.root );
 
 		fclose(file_ptr);
 		tree_free(&tree);

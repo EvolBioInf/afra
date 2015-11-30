@@ -1,6 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
+#include "matrix.h"
+#include "graph.h"
 
-void consense( char **matrix_names, matrix distance, tree_node root ){
+void newick_sv(tree_root *, char **);
+void print_species(char **names, size_t n);
+int quad_root(matrix *distance, tree_root *root);
+
+void consense( char **matrix_names, matrix distance, tree_root root ){
 	printf("\nConsensus tree program, version 3.695\n\n");
 
 	print_species(matrix_names, distance.size);
@@ -45,23 +55,23 @@ void newick_sv_post(tree_node *current, void *ctx) {
 	}
 }
 
-void newick_sv(tree_node *root, char **names) {
-	ctx_visitor v = {.pre = newick_sv_pre,
+void newick_sv(tree_root *root, char **names) {
+	visitor_ctx v = {.pre = newick_sv_pre,
 	                 .process = newick_sv_process,
 	                 .post = newick_sv_post};
 
 	printf("(");
-	ctx_traverse(root->left_branch, &v, names);
+	traverse_ctx(root->left_branch, &v, names);
 	newick_sv_process(root, names);
 
-	ctx_traverse(root->right_branch, &v, names);
+	traverse_ctx(root->right_branch, &v, names);
 	if (root->right_branch && root->right_branch->right_branch) {
 		printf("%d:%lf,", (int)(root->right_support * 100), root->right_dist);
 	} else {
 		printf(":%lf,", root->right_dist);
 	}
 
-	ctx_traverse(root->extra_branch, &v, names);
+	traverse_ctx(root->extra_branch, &v, names);
 	if (root->extra_branch && root->extra_branch->left_branch) {
 		printf("%d:%lf)", (int)(root->extra_support * 100), root->extra_dist);
 	} else {
@@ -191,12 +201,12 @@ void quad_node(tree_node *current, void *ctx) {
 	quad_right(current, (matrix *)ctx);
 }
 
-int quad_root(matrix *distance, tree_node *root) {
+int quad_root(matrix *distance, tree_root *root) {
 
-	ctx_visitor v = {.pre = NULL, .process = quad_node, .post = NULL};
+	visitor_ctx v = {.pre = NULL, .process = quad_node, .post = NULL};
 
-	ctx_traverse(root, &v, distance);
-	ctx_traverse(root->extra_branch, &v, distance);
+	traverse_ctx(root, &v, distance);
+	traverse_ctx(root->extra_branch, &v, distance);
 
 	if (root->extra_branch->left_branch) {
 		// Support Value for Root→Extra
@@ -239,9 +249,9 @@ void colorize_process(tree_node *current, void *vctx) {
 
 void colorize(tree_node *current, color_context *cctx) {
 	if (!current) return;
-	ctx_visitor v = {.pre = NULL, .process = colorize_process, .post = NULL};
+	visitor_ctx v = {.pre = NULL, .process = colorize_process, .post = NULL};
 
-	ctx_traverse(current, &v, cctx);
+	traverse_ctx(current, &v, cctx);
 }
 
 void print_species(char **names, size_t n){
