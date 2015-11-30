@@ -7,13 +7,13 @@ CPPFLAGS= -std=c11
 
 .PHONY: all clean check
 
-all: alfsv
+all: afra
 
-alfsv: alfsv.o io.o matrix.o graph.o quartet.o consense.o
+afra: afra.o io.o matrix.o graph.o quartet.o consense.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-check: alfsv
-	./alfsv ../../data/eco29.mat
+check: afra
+	./afra ../../data/eco29.mat
 
 clean:
-	rm -f alfsv *.o
+	rm -f afra *.o
