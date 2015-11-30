@@ -60,7 +60,7 @@ int main(int argc, const char *argv[]) {
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 
-		if( mode == consense){
+		if( mode == CONSENSE){
 			consense(matrix_names, distance, tree.root);
 		} else {
 			quad_root(&distance, &tree.root);
