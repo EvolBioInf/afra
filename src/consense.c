@@ -6,7 +6,6 @@
 #include "matrix.h"
 #include "graph.h"
 
-void newick_sv(tree_root *, char **);
 void print_species(char **names, size_t n);
 int set_root(matrix *distance, tree_root *root);
 
@@ -23,60 +22,6 @@ void consense(char **matrix_names, matrix distance, tree_root root) {
 	printf("\n\nSets NOT included in consensus tree: NONE.\n\n");
 
 	newick_sv(&root, matrix_names);
-}
-
-void newick_sv_pre(tree_node *current, void *ctx) {
-	if (current->left_branch) {
-		printf("(");
-	}
-}
-
-void newick_sv_process(tree_node *current, void *ctx) {
-	if (current->left_branch) {
-		if (current->left_branch->left_branch) {
-			printf("%d:%lf,", (int)(current->left_support * 100),
-			       current->left_dist);
-		} else {
-			printf(":%lf,", current->left_dist);
-		}
-	} else {
-		printf("%s", ((char **)ctx)[current->index]);
-	}
-}
-
-void newick_sv_post(tree_node *current, void *ctx) {
-	if (!current->right_branch) return;
-	if (current->right_branch->right_branch) {
-		printf("%d:%lf)", (int)(current->right_support * 100),
-		       current->right_dist);
-	} else {
-		printf(":%lf)", current->right_dist);
-	}
-}
-
-void newick_sv(tree_root *root, char **names) {
-	visitor_ctx v = {.pre = newick_sv_pre,
-	                 .process = newick_sv_process,
-	                 .post = newick_sv_post};
-
-	printf("(");
-	traverse_ctx(root->left_branch, &v, names);
-	newick_sv_process(root, names);
-
-	traverse_ctx(root->right_branch, &v, names);
-	if (root->right_branch && root->right_branch->right_branch) {
-		printf("%d:%lf,", (int)(root->right_support * 100), root->right_dist);
-	} else {
-		printf(":%lf,", root->right_dist);
-	}
-
-	traverse_ctx(root->extra_branch, &v, names);
-	if (root->extra_branch && root->extra_branch->left_branch) {
-		printf("%d:%lf)", (int)(root->extra_support * 100), root->extra_dist);
-	} else {
-		printf(":%lf)", root->extra_dist);
-	}
-	printf(";\n");
 }
 
 enum { SET_D, SET_A, SET_B, SET_C };

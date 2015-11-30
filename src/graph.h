@@ -42,4 +42,6 @@ typedef struct visitor_ctx {
 } visitor_ctx;
 void traverse_ctx(tree_node *current, visitor_ctx *v, void *);
 
+void newick_sv(tree_root *, char **);
+
 #endif
