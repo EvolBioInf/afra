@@ -10,20 +10,19 @@ void newick_sv(tree_root *, char **);
 void print_species(char **names, size_t n);
 int quad_root(matrix *distance, tree_root *root);
 
-void consense( char **matrix_names, matrix distance, tree_root root ){
+void consense(char **matrix_names, matrix distance, tree_root root) {
 	printf("\nConsensus tree program, version 3.695\n\n");
 
 	print_species(matrix_names, distance.size);
 
 	printf("\n\n\nSets included in the consensus tree\n\n"
-		"Set (species in order)     How many times out of  100.00\n\n");
+	       "Set (species in order)     How many times out of  100.00\n\n");
 
 	quad_root(&distance, &root);
 
 	printf("\n\nSets NOT included in consensus tree: NONE.\n\n");
 
 	newick_sv(&root, matrix_names);
-
 }
 
 void newick_sv_pre(tree_node *current, void *ctx) {
@@ -41,7 +40,7 @@ void newick_sv_process(tree_node *current, void *ctx) {
 			printf(":%lf,", current->left_dist);
 		}
 	} else {
-		printf("%s", ((char**)ctx)[current->index]);
+		printf("%s", ((char **)ctx)[current->index]);
 	}
 }
 
@@ -111,7 +110,7 @@ double support(const matrix *distance, const char *types) {
 				for (D = 0; D < size; D++) {
 					if (types[D] != SET_D) continue;
 
- #define M(I, J) (MATRIX_CELL(*distance, I, J))
+#define M(I, J) (MATRIX_CELL(*distance, I, J))
 
 					quadruple_counter++;
 
@@ -155,10 +154,11 @@ void quad_left(tree_node *current, matrix *distance) {
 	current->left_support = d;
 	// printf("%lf\n", d);
 
-	for(size_t i=0; i<distance->size; i++){
-		printf("%c", (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
+	for (size_t i = 0; i < distance->size; i++) {
+		printf("%c",
+		       (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
 	}
-	printf("                     %2.1lf\n", d*100);
+	printf("                     %2.1lf\n", d * 100);
 
 	free(cctx.types);
 }
@@ -183,10 +183,11 @@ void quad_right(tree_node *current, matrix *distance) {
 	double d = support(distance, cctx.types);
 	current->right_support = d;
 
-	for(size_t i=0; i<distance->size; i++){
-		printf("%c", (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
+	for (size_t i = 0; i < distance->size; i++) {
+		printf("%c",
+		       (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
 	}
-	printf("                     %2.1lf\n", d*100);
+	printf("                     %2.1lf\n", d * 100);
 
 	free(cctx.types);
 }
@@ -227,11 +228,13 @@ int quad_root(matrix *distance, tree_root *root) {
 
 		double d = support(distance, cctx.types);
 		root->extra_support = d;
-		
-		for(size_t i=0; i<distance->size; i++){
-			printf("%c", (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
+
+		for (size_t i = 0; i < distance->size; i++) {
+			printf("%c", (cctx.types[i] == SET_A || cctx.types[i] == SET_B)
+			                 ? '*'
+			                 : '.');
 		}
-		printf("                     %2.1lf\n", d*100);
+		printf("                     %2.1lf\n", d * 100);
 
 		free(cctx.types);
 	}
@@ -254,17 +257,16 @@ void colorize(tree_node *current, color_context *cctx) {
 	traverse_ctx(current, &v, cctx);
 }
 
-void print_species(char **names, size_t n){
+void print_species(char **names, size_t n) {
 	printf("Species in order:\n\n");
-	for(size_t i=0; i< n; i++){
-		printf("  %zu. %s\n",i+1, names[i] );
+	for (size_t i = 0; i < n; i++) {
+		printf("  %zu. %s\n", i + 1, names[i]);
 	}
 }
 
-void print_sets(tree_root *root, color_context *cctx){
-}
+void print_sets(tree_root *root, color_context *cctx) {}
 
-void print_sets_node(tree_node *current, void *ctx){
+void print_sets_node(tree_node *current, void *ctx) {
 	size_t size;
 	color_context cctx;
 	cctx.types = malloc(size);
@@ -273,7 +275,7 @@ void print_sets_node(tree_node *current, void *ctx){
 	cctx.color = SET_A;
 	colorize(current->left_branch, &cctx);
 
-	for(size_t i=0; i<size; i++){
+	for (size_t i = 0; i < size; i++) {
 		printf("%c", cctx.types[i] == SET_A ? '*' : '.');
 	}
 	printf("                     %lf\n", current->left_dist);

@@ -10,8 +10,7 @@
 #include "graph.h"
 #include "quartet.h"
 
-
-void consense( char **matrix_names, matrix distance, tree_root root );
+void consense(char **matrix_names, matrix distance, tree_root root);
 
 int main(int argc, const char *argv[]) {
 
@@ -49,7 +48,7 @@ int main(int argc, const char *argv[]) {
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 
-		consense( matrix_names, distance, tree.root );
+		consense(matrix_names, distance, tree.root);
 
 		fclose(file_ptr);
 		tree_free(&tree);
