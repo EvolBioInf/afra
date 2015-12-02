@@ -31,7 +31,7 @@ void consense(char **matrix_names, matrix distance, tree_root root);
 int main(int argc, const char *argv[]) {
 
 	if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 'h') {
-		fprintf(stderr, "Usage: %s quartet|consense [FASTA...]\n", argv[0]);
+		fprintf(stderr, "Usage: %s quartet|consense [MATRIX...]\n", argv[0]);
 		return 1;
 	}
 
