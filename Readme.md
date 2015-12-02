@@ -3,8 +3,18 @@
 This program computes support values from distance matrices without the
 need for a multiple sequence-alignment.
 
+## Compilation Instructions
 
+Execute the following steps to create your own version of `afra`.
 
+    % git clone https://github.com/EvolBioInf/afra.git
+    % cd afra/src
+    % make
+
+You should now have a `afra` executable ready for usage.
+
+    % ./afra quartet foo.mat
+    (((Seq0:-0.113017,Seq4:0.645317)100:0.084738,Seq1:-0.069237)50:0.053837,Seq3:0.354563,Seq2:0.093537);
 
 ## License
 
