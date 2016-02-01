@@ -21,5 +21,6 @@
 #include "matrix.h"
 
 int quad_root(matrix *distance, tree_root *root);
+double support(const matrix *distance, const char *types);
 
 #endif

@@ -21,6 +21,7 @@
 
 #include "matrix.h"
 #include "graph.h"
+#include "quartet.h"
 
 void print_species(char **names, size_t n);
 int set_root(matrix *distance, tree_root *root);
