@@ -16,6 +16,7 @@
 
 #include <assert.h>
 #include <err.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,30 +28,49 @@
 #include "graph.h"
 #include "quartet.h"
 
-void usage(void);
+void usage(int);
 void version(void);
 
 void consense(char **matrix_names, matrix distance, tree_root root);
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
 
-	if (argc < 2 || (argc == 2 && strcmp(argv[1], "-h") == 0)) {
-		usage();
+	struct option long_options[] = {
+	    {"version", no_argument, NULL, 'V'},
+	    {"mode", required_argument, NULL, 'm'},
+	    {"help", no_argument, NULL, 'h'},
+	    {0, 0, 0, 0}};
+
+	enum { QUARTET, CONSENSE } mode = QUARTET;
+
+	while (1) {
+		int c = getopt_long(argc, argv, "Vhm:", long_options, NULL);
+		if (c == -1){
+			break;
+		}
+
+		switch (c) {
+		case 'V':
+			version();
+		case 'h':
+			usage(EXIT_SUCCESS);
+		case 'm':
+			if (strcmp(optarg, "quartet") == 0) {
+				mode = QUARTET;
+			} else if (strcmp(optarg, "consense") == 0) {
+				mode = CONSENSE;
+			} else {
+				errx(1,
+				     "invalid mode. Should be one of 'quartet' or 'consense'.");
+			}
+			break;
+		case '?': /* intentional fall-through */
+		default:
+			usage(EXIT_FAILURE);
+		}
 	}
 
-	argv += 1;
-
-	enum { QUARTET, CONSENSE } mode;
-
-	if (strcmp(*argv, "quartet") == 0) {
-		mode = QUARTET;
-	} else if (strcmp(*argv, "consense") == 0) {
-		mode = CONSENSE;
-	} else {
-		errx(1, "invalid mode. Should be one of 'quartet' or 'consense'.");
-	}
-
-	argv += 1;
+	argv += optind;
 
 	int firsttime = 1;
 	int exit_code = EXIT_SUCCESS;
@@ -97,11 +117,11 @@ int main(int argc, const char *argv[]) {
 	return exit_code;
 }
 
-void usage(void) {
+void usage(int exit_code) {
 	static const char *str = {"Usage: afra quartet|consense [MATRIX...]\n"};
 
 	printf("%s", str);
-	exit(EXIT_SUCCESS);
+	exit(exit_code);
 }
 
 void version(void) {
