@@ -88,8 +88,7 @@ int main(int argc, char *argv[]) {
 			if (!file_ptr) err(1, "%s", file_name);
 		}
 
-		char **matrix_names;
-		matrix distance = read_matrix(file_ptr, &matrix_names);
+		matrix distance = read_matrix(file_ptr);
 
 		if (distance.size < 4) {
 			errx(1, "this program requires at least four taxa.");
@@ -99,10 +98,10 @@ int main(int argc, char *argv[]) {
 		neighbor_joining(&distance, &tree);
 
 		if (mode == CONSENSE) {
-			consense(matrix_names, distance, tree.root);
+			consense(distance.names, distance, tree.root);
 		} else {
 			quad_root(&distance, &tree.root);
-			newick_sv(&tree.root, matrix_names);
+			newick_sv(&tree.root, distance.names);
 		}
 
 		fclose(file_ptr);

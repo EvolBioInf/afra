@@ -22,7 +22,7 @@
 #include "global.h"
 #include "matrix.h"
 
-matrix read_matrix(FILE *in, char ***out_matrix_names) {
+matrix read_matrix(FILE *in) {
 	size_t matrix_size;
 
 	int check = fscanf(in, "%zu\n", &matrix_size);
@@ -42,7 +42,6 @@ matrix read_matrix(FILE *in, char ***out_matrix_names) {
 		}
 	}
 
-	*out_matrix_names = distance.names;
 	return distance;
 
 format_error:
