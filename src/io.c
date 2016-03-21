@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "global.h"
 #include "matrix.h"
 
 matrix read_matrix(FILE *in, char ***out_matrix_names) {
@@ -33,7 +34,7 @@ matrix read_matrix(FILE *in, char ***out_matrix_names) {
 	if (l != 0) goto format_error;
 
 	matrix_names = malloc(matrix_size * sizeof(char *));
-	if (!matrix_names) goto format_error;
+	CHECK_MALLOC(matrix_names);
 
 	size_t i, j;
 	for (i = 0; i < matrix_size; i++) {

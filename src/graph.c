@@ -15,19 +15,21 @@
  */
 
 #include <assert.h>
+#include <err.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
 #include "graph.h"
+#include "global.h"
 #include "matrix.h"
 
 int tree_init(tree_s *baum, size_t size) {
 	if (!baum || !size) return 1;
 	*baum = (tree_s){};
 	baum->pool = malloc(2 * size * sizeof(tree_node));
-	if (!baum->pool) return errno;
+	CHECK_MALLOC(baum->pool);
 	baum->size = size;
 	return 0;
 }
@@ -50,6 +52,7 @@ int neighbor_joining(matrix *distance, tree_s *out_tree) {
 	tree_node *node_pool = out_tree->pool;
 	tree_node *empty_node_ptr = &node_pool[matrix_size];
 	tree_node **unjoined_nodes = malloc(matrix_size * sizeof(tree_node *));
+	CHECK_MALLOC(unjoined_nodes);
 
 	size_t n = matrix_size;
 	size_t i, j;

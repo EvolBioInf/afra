@@ -14,10 +14,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <err.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
+#include "global.h"
 #include "quartet.h"
 
 enum { SET_D, SET_A, SET_B, SET_C };
@@ -69,6 +72,7 @@ void quad_left(tree_node *current, matrix *distance) {
 	color_context cctx;
 
 	cctx.types = malloc(distance->size);
+	CHECK_MALLOC(cctx.types);
 	memset(cctx.types, SET_D, distance->size);
 
 	cctx.color = SET_A;
@@ -93,6 +97,7 @@ void quad_right(tree_node *current, matrix *distance) {
 	color_context cctx;
 
 	cctx.types = malloc(distance->size);
+	CHECK_MALLOC(cctx.types);
 	memset(cctx.types, SET_D, distance->size);
 
 	cctx.color = SET_A;
@@ -134,6 +139,7 @@ int quad_root(matrix *distance, tree_root *root) {
 		color_context cctx;
 
 		cctx.types = malloc(distance->size);
+		CHECK_MALLOC(cctx.types);
 		memset(cctx.types, SET_D, distance->size);
 
 		cctx.color = SET_A;
