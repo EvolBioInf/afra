@@ -21,27 +21,30 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "config.h"
 #include "io.h"
 #include "matrix.h"
 #include "graph.h"
 #include "quartet.h"
 
+void usage(void);
+void version(void);
+
 void consense(char **matrix_names, matrix distance, tree_root root);
 
 int main(int argc, const char *argv[]) {
 
-	if (argc < 2 || (argc == 2 && strcmp(argv[1],"-h") == 0)) {
-		fprintf(stderr, "Usage: %s quartet|consense [MATRIX...]\n", argv[0]);
-		return 1;
+	if (argc < 2 || (argc == 2 && strcmp(argv[1], "-h") == 0)) {
+		usage();
 	}
 
 	argv += 1;
 
-	enum {QUARTET,CONSENSE} mode;
+	enum { QUARTET, CONSENSE } mode;
 
-	if(strcmp(*argv,"quartet") ==  0){
+	if (strcmp(*argv, "quartet") == 0) {
 		mode = QUARTET;
-	} else if (strcmp(*argv,"consense") == 0){
+	} else if (strcmp(*argv, "consense") == 0) {
 		mode = CONSENSE;
 	} else {
 		errx(1, "invalid mode. Should be one of 'quartet' or 'consense'.");
@@ -76,7 +79,7 @@ int main(int argc, const char *argv[]) {
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
 
-		if( mode == CONSENSE){
+		if (mode == CONSENSE) {
 			consense(matrix_names, distance, tree.root);
 		} else {
 			quad_root(&distance, &tree.root);
@@ -92,4 +95,24 @@ int main(int argc, const char *argv[]) {
 	}
 
 	return exit_code;
+}
+
+void usage(void) {
+	static const char *str = {"Usage: afra quartet|consense [MATRIX...]\n"};
+
+	printf("%s", str);
+	exit(EXIT_SUCCESS);
+}
+
+void version(void) {
+	static const char *str = {
+	    "afra" VERSION "\n"
+	    "Copyright (C) 2015 - 2016 Fabian Klötzl\n"
+	    "Licenses GPLv3+: GNU GPL version 3 or later "
+	    "<http://gnu.org/licenses/gpl.html>\n"
+	    "This is free software: you are free to change and redistribute it.\n"
+	    "There is NO WARRANTY, to the extent permittet by law.\n"};
+
+	printf("%s", str);
+	exit(EXIT_SUCCESS);
 }
