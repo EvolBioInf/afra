@@ -35,7 +35,7 @@ void consense(char **matrix_names, matrix distance, tree_root root);
 
 int main(int argc, char *argv[]) {
 
-	struct option long_options[] = {
+	const struct option long_options[] = {
 	    {"version", no_argument, NULL, 'V'},
 	    {"mode", required_argument, NULL, 'm'},
 	    {"help", no_argument, NULL, 'h'},
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
 	while (1) {
 		int c = getopt_long(argc, argv, "Vhm:", long_options, NULL);
-		if (c == -1){
+		if (c == -1) {
 			break;
 		}
 
@@ -117,7 +117,15 @@ int main(int argc, char *argv[]) {
 }
 
 void usage(int exit_code) {
-	static const char *str = {"Usage: afra quartet|consense [MATRIX...]\n"};
+	static const char *str = {
+	    "Usage: afra [-Vh] [-m quartet|consense] [MATRIX...]\n"
+	    "\tMATRIX... can be any sequence of matrices in PHYLIP format. If no "
+	    "files are supplied, stdin is used instead.\n"
+	    "Options:\n"
+	    "  -m, --mode <quartet|consense>\n"
+	    "                    Analysis mode; default: quartet\n"
+	    "  -h, --help        Display this help and exit\n"
+	    "  -V, --version     Output version information\n"};
 
 	printf("%s", str);
 	exit(exit_code);
