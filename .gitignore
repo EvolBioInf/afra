@@ -18,6 +18,9 @@ install-sh
 Makefile
 missing
 *.in
+*.hin
 **/.deps/*
 .dirstamp
+src/stamp-h1
+src/config.h
 

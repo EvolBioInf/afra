@@ -12,5 +12,6 @@ AC_TYPE_SSIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset])
 
+AC_CONFIG_HEADERS([src/config.h:src/config.hin])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
