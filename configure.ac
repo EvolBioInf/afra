@@ -1,4 +1,4 @@
-AC_INIT([afra], [1])
+AC_INIT([afra], [m4_esyscmd_s([git describe --always])])
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 AC_PROG_CC
