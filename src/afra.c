@@ -133,7 +133,7 @@ void usage(int exit_code) {
 
 void version(void) {
 	static const char *str = {
-	    "afra" VERSION "\n"
+	    "afra " VERSION "\n"
 	    "Copyright (C) 2015 - 2016 Fabian Klötzl\n"
 	    "Licenses GPLv3+: GNU GPL version 3 or later "
 	    "<http://gnu.org/licenses/gpl.html>\n"
