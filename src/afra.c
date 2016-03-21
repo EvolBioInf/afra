@@ -73,13 +73,12 @@ int main(int argc, char *argv[]) {
 	argv += optind;
 
 	int firsttime = 1;
-	int exit_code = EXIT_SUCCESS;
 
 	for (;; firsttime = 0) {
 		FILE *file_ptr;
 		const char *file_name;
 		if (!*argv) {
-			if (!firsttime) exit(exit_code);
+			if (!firsttime) break;
 
 			file_ptr = stdin;
 			file_name = "stdin";
@@ -114,7 +113,7 @@ int main(int argc, char *argv[]) {
 		free(matrix_names);
 	}
 
-	return exit_code;
+	return EXIT_SUCCESS;
 }
 
 void usage(int exit_code) {
