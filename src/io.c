@@ -24,7 +24,6 @@
 
 matrix read_matrix(FILE *in, char ***out_matrix_names) {
 	size_t matrix_size;
-	char **matrix_names;
 
 	int check = fscanf(in, "%zu\n", &matrix_size);
 	if (check < 1) goto format_error;
@@ -33,12 +32,9 @@ matrix read_matrix(FILE *in, char ***out_matrix_names) {
 	int l = matrix_init(&distance, matrix_size);
 	if (l != 0) goto format_error;
 
-	matrix_names = malloc(matrix_size * sizeof(char *));
-	CHECK_MALLOC(matrix_names);
-
 	size_t i, j;
 	for (i = 0; i < matrix_size; i++) {
-		check = fscanf(in, "%ms ", &matrix_names[i]);
+		check = fscanf(in, "%ms ", &distance.names[i]);
 		if (check < 1) goto format_error;
 		for (j = 0; j < matrix_size; j++) {
 			check = fscanf(in, "%lf ", &MATRIX_CELL(distance, i, j));
@@ -46,7 +42,7 @@ matrix read_matrix(FILE *in, char ***out_matrix_names) {
 		}
 	}
 
-	*out_matrix_names = matrix_names;
+	*out_matrix_names = distance.names;
 	return distance;
 
 format_error:

@@ -107,10 +107,7 @@ int main(int argc, char *argv[]) {
 
 		fclose(file_ptr);
 		tree_free(&tree);
-		for (size_t i = 0; i < distance.size; i++) {
-			free(matrix_names[i]);
-		}
-		free(matrix_names);
+		matrix_free(&distance);
 	}
 
 	return EXIT_SUCCESS;
