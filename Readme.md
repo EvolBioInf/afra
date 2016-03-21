@@ -8,7 +8,9 @@ need for a multiple sequence-alignment.
 Execute the following steps to create your own version of `afra`.
 
     % git clone https://github.com/EvolBioInf/afra.git
-    % cd afra/src
+    % cd afra
+    % autoreconf -i
+    % ./configure
     % make
 
 You should now have a `afra` executable ready for usage.
