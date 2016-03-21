@@ -133,8 +133,8 @@ int neighbor_joining(matrix *distance, tree_s *out_tree) {
 		row_k[min_i] = 0.0;
 		row_k[min_j] = row_k[n - 1];
 
-		memcpy(&M(min_i, 0), row_k, matrix_size * sizeof(double));
-		memcpy(&M(min_j, 0), &M((n - 1), 0), matrix_size * sizeof(double));
+		memmove(&M(min_i, 0), row_k, matrix_size * sizeof(double));
+		memmove(&M(min_j, 0), &M((n - 1), 0), matrix_size * sizeof(double));
 
 		M(min_i, min_i) = M(min_j, min_j) = 0.0;
 
