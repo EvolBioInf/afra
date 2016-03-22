@@ -16,17 +16,24 @@
 
 #include <assert.h>
 #include <err.h>
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "config.h"
 #include "io.h"
 #include "matrix.h"
 #include "graph.h"
 #include "quartet.h"
+
+int THREADS = 1;
 
 void usage(int);
 void version(void);
@@ -39,12 +46,18 @@ int main(int argc, char *argv[]) {
 	    {"version", no_argument, NULL, 'V'},
 	    {"mode", required_argument, NULL, 'm'},
 	    {"help", no_argument, NULL, 'h'},
+	    {"threads", required_argument, NULL, 't'},
 	    {0, 0, 0, 0}};
+
+#ifdef _OPENMP
+	// Use all available processors by default.
+	THREADS = omp_get_num_procs();
+#endif
 
 	enum { QUARTET, CONSENSE } mode = QUARTET;
 
 	while (1) {
-		int c = getopt_long(argc, argv, "Vhm:", long_options, NULL);
+		int c = getopt_long(argc, argv, "Vhm:t:", long_options, NULL);
 		if (c == -1) {
 			break;
 		}
@@ -64,6 +77,35 @@ int main(int argc, char *argv[]) {
 				     "invalid mode. Should be one of 'quartet' or 'consense'.");
 			}
 			break;
+		case 't': {
+#ifdef _OPENMP
+			errno = 0;
+			char *end;
+			long unsigned int threads = strtoul(optarg, &end, 10);
+
+			if (errno || end == optarg || *end != '\0') {
+				warnx("Expected a number for -t argument, but '%s' was "
+				      "given. Ignoring -t argument.",
+				      optarg);
+				break;
+			}
+
+			if (threads > (long unsigned int)omp_get_num_procs()) {
+				warnx("The number of threads to be used, is greater then the "
+				      "number of available processors; Ignoring -t %lu "
+				      "argument.",
+				      threads);
+				break;
+			}
+
+			THREADS = threads;
+#else
+			warnx("This version of afra was built without OpenMP and thus "
+			      "does not support multi threading. Ignoring -t argument.");
+#endif
+			break;
+		}
+
 		case '?': /* intentional fall-through */
 		default:
 			usage(EXIT_FAILURE);
@@ -114,12 +156,14 @@ int main(int argc, char *argv[]) {
 
 void usage(int exit_code) {
 	static const char *str = {
-	    "Usage: afra [-Vh] [-m quartet|consense] [MATRIX...]\n"
+	    "Usage: afra [-Vh] [-t INT] [-m quartet|consense] [MATRIX...]\n"
 	    "\tMATRIX... can be any sequence of matrices in PHYLIP format. If no "
 	    "files are supplied, stdin is used instead.\n"
 	    "Options:\n"
 	    "  -m, --mode <quartet|consense>\n"
 	    "                    Analysis mode; default: quartet\n"
+	    "  -t, --threads int Number of threads; by default all processors are "
+	    "used.\n"
 	    "  -h, --help        Display this help and exit\n"
 	    "  -V, --version     Output version information\n"};
 

@@ -126,7 +126,7 @@ void quartet_all(matrix *distance, tree_s *baum) {
 	size_t size = distance->size;
 	tree_node *inner_nodes = baum->pool + size;
 
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic) num_threads(THREADS)
 	for (size_t i = 0; i < size - 2; i++) {
 		quartet_node(&inner_nodes[i], distance);
 	}

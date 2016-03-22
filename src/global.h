@@ -24,3 +24,5 @@
 			err(errno, "Out of memory");                                       \
 		}                                                                      \
 	} while (0);
+
+extern int THREADS;
