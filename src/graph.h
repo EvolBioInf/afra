@@ -56,7 +56,7 @@ typedef void (*tree_node_processor_context)(tree_node *, void *);
 typedef struct visitor_ctx {
 	tree_node_processor_context pre, process, post;
 } visitor_ctx;
-void traverse_ctx(tree_node *current, visitor_ctx *v, void *);
+void traverse_all(tree_node *current, visitor_ctx *v, void *);
 
 void newick_sv(tree_root *, char **);
 

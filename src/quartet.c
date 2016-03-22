@@ -178,5 +178,5 @@ void colorize(tree_node *current, color_context *cctx) {
 	if (!current) return;
 	visitor_ctx v = {.pre = NULL, .process = colorize_process, .post = NULL};
 
-	traverse_ctx(current, &v, cctx);
+	traverse_all(current, &v, cctx);
 }
