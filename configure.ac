@@ -5,6 +5,7 @@ AC_PROG_CC
 AC_PROG_CPP
 
 AC_LANG(C)
+AC_OPENMP
 
 AC_CHECK_HEADERS([stdlib.h string.h])
 AC_TYPE_SIZE_T
