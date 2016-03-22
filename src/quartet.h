@@ -20,8 +20,8 @@
 #include "graph.h"
 #include "matrix.h"
 
-int quad_root(matrix *distance, tree_root *root);
-void quad_all(matrix* distance, tree_s *baum);
+int quartet_root(matrix *distance, tree_root *root);
+void quartet_all(matrix *distance, tree_s *baum);
 double support(const matrix *distance, const char *types);
 
 #endif

@@ -67,7 +67,7 @@ typedef struct color_context { char *types, color; } color_context;
 
 void colorize(tree_node *current, color_context *);
 
-void quad_left(tree_node *current, matrix *distance) {
+void quartet_left(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->left_branch->left_branch) return;
 	color_context cctx;
 
@@ -92,7 +92,7 @@ void quad_left(tree_node *current, matrix *distance) {
 	free(cctx.types);
 }
 
-void quad_right(tree_node *current, matrix *distance) {
+void quartet_right(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->right_branch->left_branch) return;
 	color_context cctx;
 
@@ -117,29 +117,28 @@ void quad_right(tree_node *current, matrix *distance) {
 	free(cctx.types);
 }
 
-
-void quad_node(tree_node *current, void *ctx) {
+void quartet_node(tree_node *current, void *ctx) {
 	if (!current->left_branch) return;
 
 	// left branch
-	quad_left(current, (matrix *)ctx);
+	quartet_left(current, (matrix *)ctx);
 
 	// right branch
-	quad_right(current, (matrix *)ctx);
+	quartet_right(current, (matrix *)ctx);
 }
 
-void quad_all(matrix* distance, tree_s *baum) {
+void quartet_all(matrix *distance, tree_s *baum) {
 	// iterate over all nodes
 	size_t size = distance->size;
-	tree_node* inner_nodes = baum->pool + size;
+	tree_node *inner_nodes = baum->pool + size;
 
-	#pragma omp parallel for schedule(dynamic)
-	for (size_t i=0; i< size - 2; i++) {
-		quad_node(&inner_nodes[i], distance);
+#pragma omp parallel for schedule(dynamic)
+	for (size_t i = 0; i < size - 2; i++) {
+		quartet_node(&inner_nodes[i], distance);
 	}
 
 	tree_root *root = &baum->root;
-	quad_node(&root->as_tree_node, distance);
+	quartet_node(&root->as_tree_node, distance);
 
 	if (root->extra_branch->left_branch) {
 		// Support Value for Root→Extra
@@ -165,42 +164,6 @@ void quad_all(matrix* distance, tree_s *baum) {
 
 		free(cctx.types);
 	}
-}
-
-
-int quad_root(matrix *distance, tree_root *root) {
-
-	visitor_ctx v = {.pre = NULL, .process = quad_node, .post = NULL};
-
-	traverse_ctx(&root->as_tree_node, &v, distance);
-	traverse_ctx(root->extra_branch, &v, distance);
-
-	if (root->extra_branch->left_branch) {
-		// Support Value for Root→Extra
-		color_context cctx;
-
-		cctx.types = malloc(distance->size);
-		CHECK_MALLOC(cctx.types);
-		memset(cctx.types, SET_D, distance->size);
-
-		cctx.color = SET_A;
-		colorize(root->extra_branch->left_branch, &cctx);
-
-		cctx.color = SET_B;
-		colorize(root->extra_branch->right_branch, &cctx);
-
-		cctx.color = SET_C;
-		colorize(root->left_branch, &cctx);
-		// D = not A, B, C;
-
-		double d = support(distance, cctx.types);
-		root->extra_support = d;
-		// printf("%lf\n", d);
-
-		free(cctx.types);
-	}
-
-	return 0;
 }
 
 void colorize_process(tree_node *current, void *vctx) {
