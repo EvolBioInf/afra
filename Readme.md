@@ -19,7 +19,7 @@ You should now have a `afra` executable ready for usage.
 
 ## License
 
-Copyright (C) 2015  Fabian Klötzl
+Copyright (C) 2015 - 2016  Fabian Klötzl
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
