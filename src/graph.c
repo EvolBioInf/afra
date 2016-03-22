@@ -30,6 +30,7 @@ int tree_init(tree_s *baum, size_t size) {
 	*baum = (tree_s){};
 	baum->pool = malloc(2 * size * sizeof(tree_node));
 	CHECK_MALLOC(baum->pool);
+	memset(baum->pool, 0, 2 * size * sizeof(tree_node));
 	baum->size = size;
 	return 0;
 }

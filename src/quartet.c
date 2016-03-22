@@ -117,6 +117,7 @@ void quad_right(tree_node *current, matrix *distance) {
 	free(cctx.types);
 }
 
+
 void quad_node(tree_node *current, void *ctx) {
 	if (!current->left_branch) return;
 
@@ -126,6 +127,46 @@ void quad_node(tree_node *current, void *ctx) {
 	// right branch
 	quad_right(current, (matrix *)ctx);
 }
+
+void quad_all(matrix* distance, tree_s *baum) {
+	// iterate over all nodes
+	size_t size = distance->size;
+	tree_node* inner_nodes = baum->pool + size;
+
+	#pragma omp parallel for schedule(guided)
+	for (size_t i=0; i< size - 2; i++) {
+		quad_node(&inner_nodes[i], distance);
+	}
+
+	tree_root *root = &baum->root;
+	quad_node(&root->as_tree_node, distance);
+
+	if (root->extra_branch->left_branch) {
+		// Support Value for Root→Extra
+		color_context cctx;
+
+		cctx.types = malloc(distance->size);
+		CHECK_MALLOC(cctx.types);
+		memset(cctx.types, SET_D, distance->size);
+
+		cctx.color = SET_A;
+		colorize(root->extra_branch->left_branch, &cctx);
+
+		cctx.color = SET_B;
+		colorize(root->extra_branch->right_branch, &cctx);
+
+		cctx.color = SET_C;
+		colorize(root->left_branch, &cctx);
+		// D = not A, B, C;
+
+		double d = support(distance, cctx.types);
+		root->extra_support = d;
+		// printf("%lf\n", d);
+
+		free(cctx.types);
+	}
+}
+
 
 int quad_root(matrix *distance, tree_root *root) {
 

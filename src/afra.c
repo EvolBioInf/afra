@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 		if (mode == CONSENSE) {
 			consense(distance.names, distance, tree.root);
 		} else {
-			quad_root(&distance, &tree.root);
+			quad_all(&distance, &tree);
 			newick_sv(&tree.root, distance.names);
 		}
 
