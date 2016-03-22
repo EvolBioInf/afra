@@ -63,50 +63,28 @@ double support(const matrix *distance, const char *types) {
 
 void quartet_left(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->left_branch->left_branch) return;
-	color_context cctx;
-
-	cctx.types = malloc(distance->size);
+	color_context cctx = {.size = distance->size,
+	                      .types = malloc(distance->size)};
 	CHECK_MALLOC(cctx.types);
-	memset(cctx.types, SET_D, distance->size);
 
-	cctx.color = SET_A;
-	colorize(current->left_branch->left_branch, &cctx);
-
-	cctx.color = SET_B;
-	colorize(current->left_branch->right_branch, &cctx);
-
-	cctx.color = SET_C;
-	colorize(current->right_branch, &cctx);
-	// D = not A, B, C;
+	colorize_dry(current->left_branch, current->right_branch, &cctx);
 
 	double d = support(distance, cctx.types);
 	current->left_support = d;
-	// printf("%lf\n", d);
 
 	free(cctx.types);
 }
 
 void quartet_right(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->right_branch->left_branch) return;
-	color_context cctx;
-
-	cctx.types = malloc(distance->size);
+	color_context cctx = {.size = distance->size,
+	                      .types = malloc(distance->size)};
 	CHECK_MALLOC(cctx.types);
-	memset(cctx.types, SET_D, distance->size);
 
-	cctx.color = SET_A;
-	colorize(current->right_branch->left_branch, &cctx);
-
-	cctx.color = SET_B;
-	colorize(current->right_branch->right_branch, &cctx);
-
-	cctx.color = SET_C;
-	colorize(current->left_branch, &cctx);
-	// D = not A, B, C;
+	colorize_dry(current->right_branch, current->left_branch, &cctx);
 
 	double d = support(distance, cctx.types);
 	current->right_support = d;
-	// printf("%lf\n", d);
 
 	free(cctx.types);
 }
@@ -136,25 +114,14 @@ void quartet_all(matrix *distance, tree_s *baum) {
 
 	if (root->extra_branch->left_branch) {
 		// Support Value for Root→Extra
-		color_context cctx;
-
-		cctx.types = malloc(distance->size);
+		color_context cctx = {.size = distance->size,
+		                      .types = malloc(distance->size)};
 		CHECK_MALLOC(cctx.types);
-		memset(cctx.types, SET_D, distance->size);
 
-		cctx.color = SET_A;
-		colorize(root->extra_branch->left_branch, &cctx);
-
-		cctx.color = SET_B;
-		colorize(root->extra_branch->right_branch, &cctx);
-
-		cctx.color = SET_C;
-		colorize(root->left_branch, &cctx);
-		// D = not A, B, C;
+		colorize_dry(current->extra_branch, current->left_branch, &cctx);
 
 		double d = support(distance, cctx.types);
 		root->extra_support = d;
-		// printf("%lf\n", d);
 
 		free(cctx.types);
 	}
@@ -173,4 +140,34 @@ void colorize(tree_node *current, color_context *cctx) {
 	visitor_ctx v = {.pre = NULL, .process = colorize_process, .post = NULL};
 
 	traverse_all(current, &v, cctx);
+}
+
+/** Colorize according to the following scheme.
+ *
+ *  A -left--             --y---- C, bar
+ *           \           /
+ *          foo --x-- current
+ *           /           \
+ *  B -right-             -extra- D
+ *
+ * current is the node of the caller. It has two branches pointing down (left
+ * and right). The extra branch points to the parent. foo is supposed to be one
+ * of the down pointers and bar the other.
+ *
+ * @param foo - The node connecting the subsets A and B.
+ * @param bar - The node of subset C.
+ */
+void colorize_dry(tree_node *foo, tree_node *bar, color_context *cctx) {
+	memset(cctx->types, SET_D, cctx->size);
+
+	cctx->color = SET_A;
+	colorize(foo->left_branch, cctx);
+
+	cctx->color = SET_B;
+	colorize(foo->right_branch, cctx);
+
+	cctx->color = SET_C;
+	colorize(bar, cctx);
+
+	// D is not A, B or C
 }

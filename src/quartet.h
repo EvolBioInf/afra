@@ -29,9 +29,11 @@ enum { SET_D, SET_A, SET_B, SET_C };
 
 typedef struct color_context {
 	char *types;
+	size_t size;
 	char color;
 } color_context;
 
 void colorize(tree_node *current, color_context *);
+void colorize_dry(tree_node *foo, tree_node *bar, color_context *cctx);
 
 #endif
