@@ -41,12 +41,6 @@ void consense(char **matrix_names, matrix distance, tree_root root) {
 	newick_sv(&root, matrix_names);
 }
 
-enum { SET_D, SET_A, SET_B, SET_C };
-
-typedef struct color_context { char *types, color; } color_context;
-
-void colorize(tree_node *current, color_context *);
-
 void set_left(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->left_branch->left_branch) return;
 	color_context cctx;

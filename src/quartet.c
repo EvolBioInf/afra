@@ -23,8 +23,6 @@
 #include "global.h"
 #include "quartet.h"
 
-enum { SET_D, SET_A, SET_B, SET_C };
-
 double support(const matrix *distance, const char *types) {
 	const size_t size = distance->size;
 
@@ -62,10 +60,6 @@ double support(const matrix *distance, const char *types) {
 	// printf("%zu of %zu\n", non_supporting_counter, quartet_counter);
 	return 1 - ((double)non_supporting_counter / quartet_counter);
 }
-
-typedef struct color_context { char *types, color; } color_context;
-
-void colorize(tree_node *current, color_context *);
 
 void quartet_left(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->left_branch->left_branch) return;

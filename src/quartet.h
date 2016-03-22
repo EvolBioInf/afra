@@ -24,4 +24,14 @@ int quartet_root(matrix *distance, tree_root *root);
 void quartet_all(matrix *distance, tree_s *baum);
 double support(const matrix *distance, const char *types);
 
+// A set of four colors.
+enum { SET_D, SET_A, SET_B, SET_C };
+
+typedef struct color_context {
+	char *types;
+	char color;
+} color_context;
+
+void colorize(tree_node *current, color_context *);
+
 #endif
