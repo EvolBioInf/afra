@@ -118,7 +118,7 @@ void quartet_all(matrix *distance, tree_s *baum) {
 		                      .types = malloc(distance->size)};
 		CHECK_MALLOC(cctx.types);
 
-		colorize_dry(current->extra_branch, current->left_branch, &cctx);
+		colorize_dry(root->extra_branch, root->left_branch, &cctx);
 
 		double d = support(distance, cctx.types);
 		root->extra_support = d;

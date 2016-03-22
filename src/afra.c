@@ -138,11 +138,11 @@ int main(int argc, char *argv[]) {
 
 		tree_s tree;
 		neighbor_joining(&distance, &tree);
+		quartet_all(&distance, &tree);
 
 		if (mode == CONSENSE) {
 			consense(distance.names, distance, tree.root);
 		} else {
-			quartet_all(&distance, &tree);
 			newick_sv(&tree.root, distance.names);
 		}
 

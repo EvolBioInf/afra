@@ -14,12 +14,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <err.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
 #include "matrix.h"
+#include "global.h"
 #include "graph.h"
 #include "quartet.h"
 
@@ -43,28 +46,18 @@ void consense(char **matrix_names, matrix distance, tree_root root) {
 
 void set_left(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->left_branch->left_branch) return;
-	color_context cctx;
+	color_context cctx = {.size = distance->size,
+	                      .types = malloc(distance->size),
+	                      .color = SET_A};
+	CHECK_MALLOC(cctx.types);
 
-	cctx.types = malloc(distance->size);
 	memset(cctx.types, SET_D, distance->size);
+	colorize(current->left_branch, &cctx);
 
-	cctx.color = SET_A;
-	colorize(current->left_branch->left_branch, &cctx);
-
-	cctx.color = SET_B;
-	colorize(current->left_branch->right_branch, &cctx);
-
-	cctx.color = SET_C;
-	colorize(current->right_branch, &cctx);
-	// D = not A, B, C;
-
-	double d = support(distance, cctx.types);
-	current->left_support = d;
-	// printf("%lf\n", d);
+	double d = current->left_support;
 
 	for (size_t i = 0; i < distance->size; i++) {
-		printf("%c",
-		       (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
+		printf("%c", cctx.types[i] == SET_A ? '*' : '.');
 	}
 	printf("                     %2.1lf\n", d * 100);
 
@@ -73,27 +66,18 @@ void set_left(tree_node *current, matrix *distance) {
 
 void set_right(tree_node *current, matrix *distance) {
 	if (!current->left_branch || !current->right_branch->left_branch) return;
-	color_context cctx;
+	color_context cctx = {.size = distance->size,
+	                      .types = malloc(distance->size),
+	                      .color = SET_A};
+	CHECK_MALLOC(cctx.types);
 
-	cctx.types = malloc(distance->size);
 	memset(cctx.types, SET_D, distance->size);
+	colorize(current->right_branch, &cctx);
 
-	cctx.color = SET_A;
-	colorize(current->right_branch->left_branch, &cctx);
-
-	cctx.color = SET_B;
-	colorize(current->right_branch->right_branch, &cctx);
-
-	cctx.color = SET_C;
-	colorize(current->left_branch, &cctx);
-	// D = not A, B, C;
-
-	double d = support(distance, cctx.types);
-	current->right_support = d;
+	double d = current->right_support;
 
 	for (size_t i = 0; i < distance->size; i++) {
-		printf("%c",
-		       (cctx.types[i] == SET_A || cctx.types[i] == SET_B) ? '*' : '.');
+		printf("%c", cctx.types[i] == SET_A ? '*' : '.');
 	}
 	printf("                     %2.1lf\n", d * 100);
 
@@ -119,28 +103,18 @@ int set_root(matrix *distance, tree_root *root) {
 
 	if (root->extra_branch->left_branch) {
 		// Support Value for Root→Extra
-		color_context cctx;
+		color_context cctx = {.size = distance->size,
+		                      .types = malloc(distance->size),
+		                      .color = SET_A};
+		CHECK_MALLOC(cctx.types);
 
-		cctx.types = malloc(distance->size);
 		memset(cctx.types, SET_D, distance->size);
+		colorize(root->extra_branch, &cctx);
 
-		cctx.color = SET_A;
-		colorize(root->extra_branch->left_branch, &cctx);
-
-		cctx.color = SET_B;
-		colorize(root->extra_branch->right_branch, &cctx);
-
-		cctx.color = SET_C;
-		colorize(root->left_branch, &cctx);
-		// D = not A, B, C;
-
-		double d = support(distance, cctx.types);
-		root->extra_support = d;
+		double d = root->extra_support;
 
 		for (size_t i = 0; i < distance->size; i++) {
-			printf("%c", (cctx.types[i] == SET_A || cctx.types[i] == SET_B)
-			                 ? '*'
-			                 : '.');
+			printf("%c", cctx.types[i] == SET_A ? '*' : '.');
 		}
 		printf("                     %2.1lf\n", d * 100);
 
