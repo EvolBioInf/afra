@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -124,6 +125,11 @@ int main(int argc, char *argv[]) {
 
 			file_ptr = stdin;
 			file_name = "stdin";
+
+			if (isatty(STDIN_FILENO)) {
+				// Tell user we are expecting input …
+				warnx("no file name given; expecting distance matrix input via stdin.");
+			}
 		} else {
 			file_name = *argv++;
 			file_ptr = fopen(file_name, "r");
